@@ -1,4 +1,4 @@
-const { check, validation_result } = require("express-validator");
+const { check, validationResult } = require("express-validator");
 
 exports.register_validator = [
   check("email", "Invalid email adress").isEmail(),
@@ -6,7 +6,7 @@ exports.register_validator = [
     min: 6,
   }),
   (req, res, next) => {
-    const errors = validation_result(req);
+    const errors = validationResult(req);
     if (!errors.isEmpty())
       return res.status(422).json({ errors: errors.array() });
     next();
@@ -19,7 +19,7 @@ exports.login_validator = [
     min: 6,
   }),
   (req, res, next) => {
-    const errors = validation_result(req);
+    const errors = validationResult(req);
     if (!errors.isEmpty())
       return res.status(422).json({ errors: errors.array() });
     next();

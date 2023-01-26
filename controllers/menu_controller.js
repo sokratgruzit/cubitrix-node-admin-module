@@ -1,4 +1,4 @@
-let menu = require("../models/menu");
+const { menu } = require("@cubitrix/models");
 let main_helper = require("../helpers/main");
 
 async function get_menu(req, res) {

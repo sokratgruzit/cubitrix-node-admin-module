@@ -1,12 +1,11 @@
-const user = require("../models/user");
-const role = require("../models/role");
+const { user, role } = require("@cubitrix/models");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const config = require("config");
+const config = require("../config/default.json");
 
 async function register(email, password) {
   const candidate = await user.findOne({ email });
-  const user_role = await role.findOne({ value: "user" });
+  let user_role = await role.findOne({ value: "ADMIN" });
 
   if (candidate) {
     return {
@@ -14,14 +13,21 @@ async function register(email, password) {
       message: "user exists",
     };
   }
+  if (!user_role) {
+    user_role = new role({
+      value: "ADMIN",
+    });
+    await user_role.save();
+  }
 
   const hashed_password = await bcrypt.hash(password, 12);
-  const user = new user({
+  const result = new user({
     email,
     password: hashed_password,
     roles: user_role.value,
   });
-  await user.save();
+
+  await result.save();
 
   return {
     status: 200,
@@ -30,16 +36,16 @@ async function register(email, password) {
 }
 
 async function login(email, password) {
-  const user = await user.findOne({ email });
+  const candidate = await user.findOne({ email });
 
-  if (!user) {
+  if (!candidate) {
     return {
       status: 400,
       message: "user not found",
     };
   }
 
-  const isMatch = await bcrypt.compare(password, user.password);
+  const isMatch = await bcrypt.compare(password, candidate.password);
 
   if (!isMatch) {
     return {
@@ -48,7 +54,7 @@ async function login(email, password) {
     };
   }
 
-  if (user.roles != "ADMIN") {
+  if (candidate.roles != "ADMIN") {
     return {
       status: 400,
       message: "You have not perrmision",
@@ -57,17 +63,17 @@ async function login(email, password) {
 
   const token = jwt.sign(
     {
-      userId: user.id,
-      roles: user.roles,
+      userId: candidate.id,
+      roles: candidate.roles,
     },
-    config.get("jwtSecret"),
+    config.jwtSecret,
     { expiresIn: "1h" }
   );
 
   return {
     status: 200,
     token,
-    userId: user.id,
+    userId: candidate.id,
   };
 }
 
