@@ -1,5 +1,5 @@
-
 {
    "port" : 4000,
-   "jwtSecret": "msa_673_rt_gf_23344_mm"
+   "jwtSecret": "msa_673_rt_gf_23344_mm",
+   "roles": ["SUPER_ADMIN", "ADMIN", "MODERATOR"]
 }

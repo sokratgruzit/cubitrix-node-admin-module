@@ -3,24 +3,30 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("../config/default.json");
 
-async function register(email, password) {
+async function register(email, password, cur_role) {
   const candidate = await user.findOne({ email });
-  let user_role = await role.findOne({ value: "ADMIN" });
+  let user_role = null;
+  
+  if (cur_role) {
+    user_role = await role.findOne({ value: cur_role });
+  }
+
+  if (!user_role) {
+    return {
+      status: 400,
+      message: "There is no such role",
+    };
+  }
 
   if (candidate) {
     return {
       status: 400,
-      message: "user exists",
+      message: "User exists",
     };
-  }
-  if (!user_role) {
-    user_role = new role({
-      value: "ADMIN",
-    });
-    await user_role.save();
   }
 
   const hashed_password = await bcrypt.hash(password, 12);
+
   const result = new user({
     email,
     password: hashed_password,
@@ -31,7 +37,7 @@ async function register(email, password) {
 
   return {
     status: 200,
-    message: "user created",
+    message: "User created",
   };
 }
 
@@ -41,7 +47,7 @@ async function login(email, password) {
   if (!candidate) {
     return {
       status: 400,
-      message: "user not found",
+      message: "User not found",
     };
   }
 
@@ -51,13 +57,6 @@ async function login(email, password) {
     return {
       status: 400,
       message: "Wrong password, please try again",
-    };
-  }
-
-  if (candidate.roles != "ADMIN") {
-    return {
-      status: 400,
-      message: "You have not perrmision",
     };
   }
 

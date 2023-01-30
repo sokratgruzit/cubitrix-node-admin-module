@@ -10,18 +10,14 @@ module.exports = (req, res, next) => {
     const token = req.headers.authorization.split(" ")[1]; // "Bearer TOKEN"
 
     if (!token) {
-      return res.status(401).json({ message: "You are not autorized" });
+      return res.status(401).json({ message: "You are not authorized" });
     }
 
     const decoded = jwt.verify(token, config.jwtSecret);
 
-    if (decoded.roles != "ADMIN") {
-      return res.status(401).json({ message: "You have not permission" });
-    }
-
     req.user = decoded;
     next();
   } catch (e) {
-    res.status(401).json({ message: "You are not autorized" });
+    res.status(401).json({ message: "You are not authorized" });
   }
 };
