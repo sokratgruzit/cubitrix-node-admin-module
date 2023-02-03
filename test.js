@@ -1,11 +1,12 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const auth = require("./routes/auth_routes");
-const cors = require('cors');
+const cors = require("cors");
 const content = require("./routes/content_routes");
 const data = require("./routes/data_routes");
-const cors_options = require('./config/cors_options');
-const credentials = require('./middlewares/credentials');
+const admin_data = require("./routes/data_routes");
+const cors_options = require("./config/cors_options");
+const credentials = require("./middlewares/credentials");
 require("dotenv").config();
 const app = express();
 app.use(express.json({ extended: true }));
@@ -15,6 +16,7 @@ app.use(cors(cors_options));
 app.use("/api/auth", auth);
 app.use("/api/content", content);
 app.use("/api/data", data);
+app.use("/admin_data", admin_data);
 
 app.get("/api/test", (req, res) => {
   res.send("test");

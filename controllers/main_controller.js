@@ -270,13 +270,17 @@ async function handle_filter(req, res) {
         search_value = req_filter?.search?.value;
 
         if (search_option == "all") {
-          all_value.push(
-            { name: { $regex: search_value, $options: "i" } },
-            { address: { $regex: search_value, $options: "i" } },
-            { email: { $regex: search_value, $options: "i" } }
-          );
-          if (typeof search_option == "number") {
-            all_value.push({ mobile: { $regex: search_value, $options: "i" } });
+          if (search_value) {
+            all_value.push(
+              { name: { $regex: search_value, $options: "i" } },
+              { address: { $regex: search_value, $options: "i" } },
+              { email: { $regex: search_value, $options: "i" } }
+            );
+            if (typeof search_option == "number") {
+              all_value.push({
+                mobile: { $regex: search_value, $options: "i" },
+              });
+            }
           }
         } else {
           all_value = [
@@ -286,25 +290,123 @@ async function handle_filter(req, res) {
           ];
         }
         if (select_value && select_value != "all") {
-          search_query = {
-            $and: [{ nationality: select_value }, { $or: all_value }],
-          };
+          if (all_value && all_value.length > 0) {
+            search_query = {
+              $and: [{ nationality: select_value }, { $or: all_value }],
+            };
+          } else {
+            search_query = {
+              $and: [{ nationality: select_value }],
+            };
+          }
         } else {
           search_query = { $or: all_value };
         }
-
-        result = await account_meta
-          .find(search_query)
-          .sort({ cteatedAt: "desc" })
-          .limit(limit)
-          .skip(limit * (req_page - 1));
+        console.log(JSON.stringify(search_query), search_value);
+        result = await account_meta.aggregate([
+          { $match: search_query },
+          { $sort: { createdAt: -1 } },
+          {
+            $lookup: {
+              from: "accounts",
+              localField: "address",
+              foreignField: "account_owner",
+              as: "inner_accounts",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: "account_types",
+                    localField: "account_type_id",
+                    foreignField: "_id",
+                    as: "account_type_id",
+                  },
+                },
+                { $unwind: "$account_type_id" },
+              ],
+            },
+          },
+          {
+            $lookup: {
+              from: "accounts",
+              localField: "address",
+              foreignField: "address",
+              as: "main_account",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: "account_types",
+                    localField: "account_type_id",
+                    foreignField: "_id",
+                    as: "account_type_id",
+                  },
+                },
+                { $unwind: "$account_type_id" },
+              ],
+            },
+          },
+          { $unwind: "$main_account" },
+          {
+            $limit: limit + limit * (req_page - 1),
+          },
+          {
+            $skip: limit * (req_page - 1),
+          },
+        ]);
+        // result = await account_meta
+        //   .find(search_query)
+        //   .sort({ cteatedAt: "desc" })
+        //   .limit(limit)
+        //   .skip(limit * (req_page - 1));
         total_pages = await account_meta.count(search_query);
       } else {
-        result = await account_meta
-          .find(data)
-          .sort({ cteatedAt: "desc" })
-          .limit(limit)
-          .skip(limit * (req_page - 1));
+        result = await account_meta.aggregate([
+          { $sort: { createdAt: -1 } },
+          {
+            $lookup: {
+              from: "accounts",
+              localField: "address",
+              foreignField: "account_owner",
+              as: "inner_accounts",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: "account_types",
+                    localField: "account_type_id",
+                    foreignField: "_id",
+                    as: "account_type_id",
+                  },
+                },
+                { $unwind: "$account_type_id" },
+              ],
+            },
+          },
+          {
+            $lookup: {
+              from: "accounts",
+              localField: "address",
+              foreignField: "address",
+              as: "main_account",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: "account_types",
+                    localField: "account_type_id",
+                    foreignField: "_id",
+                    as: "account_type_id",
+                  },
+                },
+                { $unwind: "$account_type_id" },
+              ],
+            },
+          },
+          { $unwind: "$main_account" },
+          {
+            $limit: limit + limit * (req_page - 1),
+          },
+          {
+            $skip: limit * (req_page - 1),
+          },
+        ]);
         total_pages = await account_meta.count(data);
       }
     }
