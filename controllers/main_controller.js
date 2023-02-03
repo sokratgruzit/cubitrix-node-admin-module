@@ -22,6 +22,7 @@ async function handle_filter(req, res) {
       select_accounts = [],
       all_select_accounts_list,
       all_value = [],
+      select_all_value = {},
       account_type_id;
     const req_body = await req.body;
     const req_type = req_body.type;
@@ -258,6 +259,7 @@ async function handle_filter(req, res) {
     if (req_type === "users") {
       if (req_filter && !isEmpty(req_filter)) {
         select_value = req_filter?.selects?.nationality;
+        select_value_account_type_id = req_filter?.selects?.account_type_id;
 
         if (
           !req_filter?.search?.option ||
@@ -299,10 +301,40 @@ async function handle_filter(req, res) {
               $and: [{ nationality: select_value }],
             };
           }
-        } else {
-          search_query = { $or: all_value };
         }
-        console.log(JSON.stringify(search_query), search_value);
+        if (
+          select_value_account_type_id &&
+          select_value_account_type_id != "all"
+        ) {
+          account_type_id = await account_helper.get_type_id(
+            select_value_account_type_id
+          );
+          all_select_accounts_list = await accounts.find({
+            account_type_id: account_type_id,
+          });
+          for (let i = 0; i < all_select_accounts_list.length; i++) {
+            let one_account = all_select_accounts_list[i];
+            if (one_account.account_owner != "") {
+              parent_select_account.push(one_account.account_owner);
+            }
+          }
+          if (all_value && !isEmpty(all_value)) {
+            for (let k = 0; k < parent_select_account.length; k++) {
+              select_accounts.push(parent_select_account[k]);
+            }
+            select_all_value = { address: { $in: select_accounts } };
+          } else {
+            select_all_value = { address: { $in: parent_select_account } };
+          }
+        }
+        if (all_value.length > 0) {
+          search_query = { $or: all_value };
+          if (select_all_value && !isEmpty(select_all_value)) {
+            search_query = { $and: [select_all_value, { $or: all_value }] };
+          }
+        } else {
+          search_query = {};
+        }
         result = await account_meta.aggregate([
           { $match: search_query },
           { $sort: { createdAt: -1 } },
