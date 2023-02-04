@@ -7,6 +7,41 @@ const {
 const main_helper = require("../helpers/index");
 const account_helper = require("../helpers/accounts");
 
+async function delete_user (req, res) {
+  try {
+    const { email } = req.body;
+    const user_exists = await user.find({ email });
+
+    if (!user_exists) res.status(404).json({ message: "User not found!" });
+    
+    if (user_exists) {
+      await user.find({ email }).remove().exec();
+
+      res.status(200).json({ "message": "User deleted!" });
+    }
+  } catch (e) {
+    return main_helper.error_response(res, e.message);
+  }
+}
+
+async function edit_user (req, res) {
+  try {
+    const { email } = req.body;
+    const user_exists = await user.find({ email });
+
+    if (!user_exists) res.status(404).json({ message: "User not found!" });
+    
+    if (user_exists) {
+      console.log(user_exists);
+      await user.findAndUpdate({ email });
+
+      res.status(200).json({ "message": "User deleted!" });
+    }
+  } catch (e) {
+    return main_helper.error_response(res, e.message);
+  }
+}
+
 async function handle_filter(req, res) {
   try {
     let result,
@@ -462,6 +497,7 @@ async function handle_filter(req, res) {
     return main_helper.error_response(res, e.message);
   }
 }
+
 function isEmpty(obj) {
   for (var prop in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, prop)) {
@@ -471,6 +507,9 @@ function isEmpty(obj) {
 
   return JSON.stringify(obj) === JSON.stringify({});
 }
+
 module.exports = {
   handle_filter,
+  delete_user,
+  edit_user
 };
