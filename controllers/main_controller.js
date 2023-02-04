@@ -26,16 +26,23 @@ async function delete_user (req, res) {
 
 async function edit_user (req, res) {
   try {
-    const { email } = req.body;
-    const user_exists = await user.find({ email });
-
+    const { id, email, password, roles } = req.body;
+    const user_exists = await user.findOne({ _id: id });
+    
     if (!user_exists) res.status(404).json({ message: "User not found!" });
     
     if (user_exists) {
-      console.log(user_exists);
-      await user.findAndUpdate({ email });
+      const updated = await user_exists.updateOne({
+        email,
+        password,
+        roles
+      });
 
-      res.status(200).json({ "message": "User deleted!" });
+      if (updated.acknowledged) {
+        return main_helper.success_response(res, "success");
+      }
+
+      return main_helper.error_response(res, "could not update");
     }
   } catch (e) {
     return main_helper.error_response(res, e.message);
