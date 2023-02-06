@@ -32,11 +32,20 @@ async function edit_user(req, res) {
     if (!user_exists) res.status(404).json({ message: "User not found!" });
     
     if (user_exists) {
-      const updated = await user_exists.updateOne({
+      let updateData = {
         email,
         password,
         roles
-      });
+      };
+
+      if (password === "") {
+        updateData = {
+          email,
+          roles
+        }
+      }
+
+      const updated = await user_exists.updateOne(updateData);
 
       if (updated.acknowledged) {
         return main_helper.success_response(res, "success");
