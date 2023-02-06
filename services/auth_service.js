@@ -3,12 +3,13 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("../config/default.json");
 
-async function register(email, password, cur_role) {
+async function register(email, roles, password, id) {
+  console.log(roles,'hiii')
   const candidate = await user.findOne({ email });
   let user_role = null;
-  
-  if (cur_role) {
-    user_role = await role.findOne({ value: cur_role });
+
+  if (roles) {
+    user_role = await role.findOne({ value: roles });
   }
 
   if (!user_role) {
