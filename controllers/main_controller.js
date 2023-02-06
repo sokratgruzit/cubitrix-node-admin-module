@@ -7,7 +7,7 @@ const {
 const main_helper = require("../helpers/index");
 const account_helper = require("../helpers/accounts");
 
-async function delete_user (req, res) {
+async function delete_user(req, res) {
   try {
     const { email } = req.body;
     const user_exists = await user.find({ email });
@@ -24,7 +24,7 @@ async function delete_user (req, res) {
   }
 }
 
-async function edit_user (req, res) {
+async function edit_user(req, res) {
   try {
     const { id, email, password, roles } = req.body;
     const user_exists = await user.findOne({ _id: id });
