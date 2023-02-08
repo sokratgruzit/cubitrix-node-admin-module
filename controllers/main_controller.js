@@ -142,6 +142,9 @@ async function handle_filter(req, res) {
           {
             $skip: limit * (req_page - 1),
           },
+          {
+            $sort: { createdAt: -1 },
+          },
         ]);
         total_pages = await accounts.count(search_query);
       } else {
@@ -151,7 +154,15 @@ async function handle_filter(req, res) {
               account_owner: "",
             },
           },
-          { $sort: { createdAt: -1 } },
+          {
+            $lookup: {
+              from: "account_metas",
+              localField: "address",
+              foreignField: "address",
+              as: "account_metas",
+            },
+          },
+          { $unwind: "$account_metas" },
           {
             $lookup: {
               from: "accounts",
@@ -185,6 +196,9 @@ async function handle_filter(req, res) {
           },
           {
             $skip: limit * (req_page - 1),
+          },
+          {
+            $sort: { createdAt: -1 },
           },
         ]);
         total_pages = await accounts.count({ account_owner: "" });
@@ -243,14 +257,14 @@ async function handle_filter(req, res) {
         }
         result = await transactions
           .find(search_query)
-          .sort({ cteatedAt: "desc" })
+          .sort({ createdAt: "desc" })
           .limit(limit)
           .skip(limit * (req_page - 1));
         total_pages = await transactions.count(search_query);
       } else {
         result = await transactions
           .find(data)
-          .sort({ cteatedAt: "desc" })
+          .sort({ createdAt: "desc" })
           .limit(limit)
           .skip(limit * (req_page - 1));
         total_pages = await transactions.count(data);
@@ -337,7 +351,6 @@ async function handle_filter(req, res) {
         }
         result = await account_meta.aggregate([
           { $match: search_query },
-          { $sort: { createdAt: -1 } },
           {
             $lookup: {
               from: "accounts",
@@ -383,16 +396,18 @@ async function handle_filter(req, res) {
           {
             $skip: limit * (req_page - 1),
           },
+          {
+            $sort: { createdAt: -1 },
+          },
         ]);
         // result = await account_meta
         //   .find(search_query)
-        //   .sort({ cteatedAt: "desc" })
+        //   .sort({ createdAt: "desc" })
         //   .limit(limit)
         //   .skip(limit * (req_page - 1));
         total_pages = await account_meta.count(search_query);
       } else {
         result = await account_meta.aggregate([
-          { $sort: { createdAt: -1 } },
           {
             $lookup: {
               from: "accounts",
@@ -437,6 +452,9 @@ async function handle_filter(req, res) {
           },
           {
             $skip: limit * (req_page - 1),
+          },
+          {
+            $sort: { createdAt: -1 },
           },
         ]);
         total_pages = await account_meta.count(data);
@@ -445,7 +463,7 @@ async function handle_filter(req, res) {
     if (req_type === "admins") {
       result = await user
         .find()
-        .sort({ cteatedAt: "desc" })
+        .sort({ createdAt: "desc" })
         .limit(limit)
         .skip(limit * (req_page - 1));
       total_pages = await user.count();
