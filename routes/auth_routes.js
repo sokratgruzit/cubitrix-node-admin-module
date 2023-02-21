@@ -1,14 +1,16 @@
 const { Router } = require("express");
 const router = Router();
 
+const config = require("../config/default.json");
 const auth_controller = require("../controllers/auth_controller");
+const verify_roles = require("../middlewares/verify_roles");
 const {
   register_validator,
   login_validator,
 } = require("../middlewares/validators/auth_validator");
 
-//  /api/auth
-router.post("/register", register_validator, auth_controller.register);
+// /api/auth
+router.post("/register", register_validator, verify_roles(config.roles[0]), auth_controller.register);
 
 router.post("/login", login_validator, auth_controller.login);
 
