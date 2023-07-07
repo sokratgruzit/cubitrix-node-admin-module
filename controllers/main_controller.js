@@ -13,11 +13,11 @@ async function delete_user(req, res) {
     const user_exists = await user.find({ email });
 
     if (!user_exists) res.status(404).json({ message: "User not found!" });
-    
+
     if (user_exists) {
       await user.find({ email }).remove().exec();
 
-      res.status(200).json({ "message": "User deleted!" });
+      res.status(200).json({ message: "User deleted!" });
     }
   } catch (e) {
     return main_helper.error_response(res, e.message);
@@ -28,21 +28,21 @@ async function edit_user(req, res) {
   try {
     const { id, email, password, roles } = req.body;
     const user_exists = await user.findOne({ _id: id });
-    
+
     if (!user_exists) res.status(404).json({ message: "User not found!" });
-    
+
     if (user_exists) {
       let updateData = {
         email,
         password,
-        roles
+        roles,
       };
 
       if (password === "") {
         updateData = {
           email,
-          roles
-        }
+          roles,
+        };
       }
 
       const updated = await user_exists.updateOne(updateData);
@@ -73,8 +73,7 @@ async function handle_filter(req, res) {
       select_accounts = [],
       all_select_accounts_list,
       all_value = [],
-      select_all_value = {},
-      account_type_id;
+      select_all_value = {};
     const req_body = await req.body;
     const req_type = req_body.type;
     const req_page = req_body.page ? req_body.page : 1;
@@ -91,7 +90,6 @@ async function handle_filter(req, res) {
       data = without_search;
       data.address = data.address.toLowerCase();
     }
-
     if (req_type === "account") {
       if (req_filter && !isEmpty(req_filter)) {
         if (
@@ -99,9 +97,7 @@ async function handle_filter(req, res) {
           req_filter?.selects?.account_type_id != "all"
         ) {
           select_value = req_filter?.selects?.account_type_id;
-          account_type_id = await account_helper.get_type_id(select_value);
         }
-
         if (
           !req_filter?.search?.option ||
           req_filter?.search?.option == "all"
@@ -123,6 +119,8 @@ async function handle_filter(req, res) {
               let one_account = all_accounts_list[i];
               if (one_account.account_owner == "") {
                 parent_account.push(one_account.address);
+              } else {
+                parent_account.push(one_account.account_owner);
               }
             }
             all_value.push({ address: { $in: parent_account } });
@@ -132,14 +130,16 @@ async function handle_filter(req, res) {
             });
           }
         }
-        if (select_value && select_value != "all") {
+        if (select_value && select_value != "all" && !search_value) {
           all_select_accounts_list = await accounts.find({
-            account_type_id: account_type_id,
+            account_category: select_value,
           });
           for (let i = 0; i < all_select_accounts_list.length; i++) {
             let one_account = all_select_accounts_list[i];
             if (one_account.account_owner != "") {
               parent_select_account.push(one_account.account_owner);
+            } else {
+              parent_select_account.push(one_account.address);
             }
           }
           if (all_value && !isEmpty(all_value)) {
@@ -152,8 +152,8 @@ async function handle_filter(req, res) {
             all_value.push({ address: { $in: parent_select_account } });
           }
         }
-        if (!all_value && !isEmpty(all_value)) {
-          search_query = {};
+        if (all_value && all_value.length < 1) {
+          search_query = { account_owner: "" };
         } else {
           search_query = { $or: all_value };
         }
@@ -165,28 +165,8 @@ async function handle_filter(req, res) {
               localField: "address",
               foreignField: "account_owner",
               as: "inner_accounts",
-              pipeline: [
-                {
-                  $lookup: {
-                    from: "account_types",
-                    localField: "account_type_id",
-                    foreignField: "_id",
-                    as: "account_type_id",
-                  },
-                },
-                { $unwind: "$account_type_id" },
-              ],
             },
           },
-          {
-            $lookup: {
-              from: "account_types",
-              localField: "account_type_id",
-              foreignField: "_id",
-              as: "account_type_id",
-            },
-          },
-          { $unwind: "$account_type_id" },
           {
             $limit: limit + limit * (req_page - 1),
           },
@@ -220,28 +200,8 @@ async function handle_filter(req, res) {
               localField: "address",
               foreignField: "account_owner",
               as: "inner_accounts",
-              pipeline: [
-                {
-                  $lookup: {
-                    from: "account_types",
-                    localField: "account_type_id",
-                    foreignField: "_id",
-                    as: "account_type_id",
-                  },
-                },
-                { $unwind: "$account_type_id" },
-              ],
             },
           },
-          {
-            $lookup: {
-              from: "account_types",
-              localField: "account_type_id",
-              foreignField: "_id",
-              as: "account_type_id",
-            },
-          },
-          { $unwind: "$account_type_id" },
           {
             $limit: limit + limit * (req_page - 1),
           },
@@ -371,11 +331,8 @@ async function handle_filter(req, res) {
           select_value_account_type_id &&
           select_value_account_type_id != "all"
         ) {
-          account_type_id = await account_helper.get_type_id(
-            select_value_account_type_id
-          );
           all_select_accounts_list = await accounts.find({
-            account_type_id: account_type_id,
+            account_category: select_value,
           });
           for (let i = 0; i < all_select_accounts_list.length; i++) {
             let one_account = all_select_accounts_list[i];
@@ -408,17 +365,6 @@ async function handle_filter(req, res) {
               localField: "address",
               foreignField: "account_owner",
               as: "inner_accounts",
-              pipeline: [
-                {
-                  $lookup: {
-                    from: "account_types",
-                    localField: "account_type_id",
-                    foreignField: "_id",
-                    as: "account_type_id",
-                  },
-                },
-                { $unwind: "$account_type_id" },
-              ],
             },
           },
           {
@@ -427,17 +373,6 @@ async function handle_filter(req, res) {
               localField: "address",
               foreignField: "address",
               as: "main_account",
-              pipeline: [
-                {
-                  $lookup: {
-                    from: "account_types",
-                    localField: "account_type_id",
-                    foreignField: "_id",
-                    as: "account_type_id",
-                  },
-                },
-                { $unwind: "$account_type_id" },
-              ],
             },
           },
           { $unwind: "$main_account" },
@@ -465,17 +400,6 @@ async function handle_filter(req, res) {
               localField: "address",
               foreignField: "account_owner",
               as: "inner_accounts",
-              pipeline: [
-                {
-                  $lookup: {
-                    from: "account_types",
-                    localField: "account_type_id",
-                    foreignField: "_id",
-                    as: "account_type_id",
-                  },
-                },
-                { $unwind: "$account_type_id" },
-              ],
             },
           },
           {
@@ -484,17 +408,6 @@ async function handle_filter(req, res) {
               localField: "address",
               foreignField: "address",
               as: "main_account",
-              pipeline: [
-                {
-                  $lookup: {
-                    from: "account_types",
-                    localField: "account_type_id",
-                    foreignField: "_id",
-                    as: "account_type_id",
-                  },
-                },
-                { $unwind: "$account_type_id" },
-              ],
             },
           },
           { $unwind: "$main_account" },
@@ -545,5 +458,5 @@ function isEmpty(obj) {
 module.exports = {
   handle_filter,
   delete_user,
-  edit_user
+  edit_user,
 };
