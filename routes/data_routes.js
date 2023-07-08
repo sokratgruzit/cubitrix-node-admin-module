@@ -19,7 +19,7 @@ router.post(
 
 router.post("/filter", main_controller.handle_filter);
 router.post(
-  "/create_referral_settingsd",
+  "/create_referral_settings",
   referral_settings.create_referral_settings
 );
 router.post(
