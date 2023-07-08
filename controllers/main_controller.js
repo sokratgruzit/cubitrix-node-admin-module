@@ -228,31 +228,38 @@ async function handle_filter(req, res) {
           search_option = req_filter?.search?.option;
         }
         search_value = req_filter?.search?.value;
-
-        if (search_option == "all") {
-          all_value.push(
-            { tx_hash: { $regex: search_value, $options: "i" } },
-            { from: { $regex: search_value, $options: "i" } },
-            { to: { $regex: search_value, $options: "i" } }
-          );
-        } else {
-          all_value = [
-            {
-              [search_option]: { $regex: search_value, $options: "i" },
-            },
-          ];
+        if (search_value) {
+          if (search_option == "all") {
+            all_value.push(
+              { tx_hash: { $regex: search_value, $options: "i" } },
+              { from: { $regex: search_value, $options: "i" } },
+              { to: { $regex: search_value, $options: "i" } }
+            );
+          } else {
+            all_value = [
+              {
+                [search_option]: { $regex: search_value, $options: "i" },
+              },
+            ];
+          }
         }
         if (
           (!isEmpty(select_tx_status_value) &&
             select_tx_status_value != "all") ||
-          (!isEmpty(select_tx_type_value) && select_tx_type_value != "all")
+          (select_tx_type_value &&
+            !isEmpty(select_tx_type_value) &&
+            select_tx_type_value != "all")
         ) {
           if (search_value) {
             final_value = [{ $or: all_value }];
           } else {
             final_value = [];
           }
-          if (!isEmpty(select_tx_status_value) && select_tx_status_value) {
+          if (
+            !isEmpty(select_tx_status_value) &&
+            select_tx_status_value &&
+            select_tx_status_value != "all"
+          ) {
             final_value.push({ tx_status: select_tx_status_value });
           }
 
@@ -283,7 +290,7 @@ async function handle_filter(req, res) {
     }
     if (req_type === "users") {
       if (req_filter && !isEmpty(req_filter)) {
-        select_value = req_filter?.selects?.nationality;
+        // select_value = req_filter?.selects?.nationality;
         select_value_account_type_id = req_filter?.selects?.account_type_id;
 
         if (
@@ -316,23 +323,23 @@ async function handle_filter(req, res) {
             },
           ];
         }
-        if (select_value && select_value != "all") {
-          if (all_value && all_value.length > 0) {
-            search_query = {
-              $and: [{ nationality: select_value }, { $or: all_value }],
-            };
-          } else {
-            search_query = {
-              $and: [{ nationality: select_value }],
-            };
-          }
-        }
+        // if (select_value && select_value != "all") {
+        //   if (all_value && all_value.length > 0) {
+        //     search_query = {
+        //       $and: [{ nationality: select_value }, { $or: all_value }],
+        //     };
+        //   } else {
+        //     search_query = {
+        //       $and: [{ nationality: select_value }],
+        //     };
+        //   }
+        // }
         if (
           select_value_account_type_id &&
           select_value_account_type_id != "all"
         ) {
           all_select_accounts_list = await accounts.find({
-            account_category: select_value,
+            account_category: select_value_account_type_id,
           });
           for (let i = 0; i < all_select_accounts_list.length; i++) {
             let one_account = all_select_accounts_list[i];
