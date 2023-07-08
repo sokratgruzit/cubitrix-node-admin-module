@@ -23,5 +23,6 @@ router.post(
   "/delete_referral_settings",
   referral_settings.delete_referral_settings
 );
+router.post("/get_referral_setting", referral_settings.get_referral_setting);
 
 module.exports = router;

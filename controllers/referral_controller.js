@@ -52,4 +52,5 @@ const delete_referral_settings = async (req, res) => {
 module.exports = {
   delete_referral_settings,
   edit_referral_setting,
+  get_referral_setting,
 };
