@@ -18,10 +18,7 @@ router.post(
 );
 
 router.post("/filter", main_controller.handle_filter);
-router.post(
-  "/create_referral_settings",
-  referral_settings.create_referral_settings
-);
+router.post("/edit_referral_setting", referral_settings.edit_referral_setting);
 router.post(
   "/delete_referral_settings",
   referral_settings.delete_referral_settings
