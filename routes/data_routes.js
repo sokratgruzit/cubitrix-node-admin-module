@@ -17,6 +17,18 @@ router.post(
   main_controller.edit_user
 );
 
+router.post(
+  "/edit-user",
+  verify_roles(config.roles[0]),
+  main_controller.edit_user
+);
+
+router.post(
+  "/edit-account-meta",
+  verify_roles(config.roles[0]),
+  main_controller.edit_user_meta
+);
+
 router.post("/filter", main_controller.handle_filter);
 router.post("/edit_referral_setting", referral_settings.edit_referral_setting);
 router.post(

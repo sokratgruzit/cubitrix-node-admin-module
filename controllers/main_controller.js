@@ -58,6 +58,43 @@ async function edit_user(req, res) {
   }
 }
 
+async function edit_user_meta(req, res) {
+  try {
+    const { address, date_of_birth, email, name, nationality, mobile } =
+      req.body;
+
+    const user_exists = await account_meta.findOne({ address: address });
+
+    if (!user_exists) res.status(404).json({ message: "User not found!" });
+
+    if (user_exists) {
+      let updateData = {
+        date_of_birth,
+        email,
+        name,
+        nationality,
+        mobile,
+      };
+      if (password === "") {
+        updateData = {
+          email,
+          roles,
+        };
+      }
+
+      const updated = await account_meta.updateOne({ address }, { updateData });
+
+      if (updated) {
+        return main_helper.success_response(res, "success");
+      }
+
+      return main_helper.error_response(res, "could not update");
+    }
+  } catch (e) {
+    return main_helper.error_response(res, e.message);
+  }
+}
+
 async function handle_filter(req, res) {
   try {
     let result,
@@ -466,4 +503,5 @@ module.exports = {
   handle_filter,
   delete_user,
   edit_user,
+  edit_user_meta,
 };
