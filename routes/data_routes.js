@@ -3,6 +3,7 @@ const config = require("../config/default.json");
 const router = Router();
 const main_controller = require("../controllers/main_controller");
 const referral_settings = require("../controllers/referral_controller");
+const transaction_controller = require("../controllers/transaction_controller");
 const verify_roles = require("../middlewares/verify_roles");
 
 router.post(
@@ -36,5 +37,11 @@ router.post(
   referral_settings.delete_referral_settings
 );
 router.post("/get_referral_setting", referral_settings.get_referral_setting);
+
+// transactions
+router.post(
+  "/change_transaction_status",
+  transaction_controller.change_transaction_status
+);
 
 module.exports = router;
