@@ -43,5 +43,6 @@ router.post(
   "/change_transaction_status",
   transaction_controller.change_transaction_status
 );
+router.post("/edit_transaction", transaction_controller.edit_transaction);
 
 module.exports = router;
