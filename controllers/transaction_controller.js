@@ -6,7 +6,7 @@ const change_transaction_status = async (req, res) => {
     let { _id, tx_status } = req.body;
     let updateTx = await transactions.findOneAndUpdate({ _id }, { tx_status });
     if (updateTx) {
-      return main_helper.success_response(res, "error");
+      return main_helper.success_response(res, updateTx);
     } else {
       return main_helper.error_response(res, "error");
     }
