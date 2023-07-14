@@ -1,4 +1,9 @@
-const { accounts, transactions, account_meta, user } = require("@cubitrix/models");
+const {
+  accounts,
+  transactions,
+  account_meta,
+  user,
+} = require("@cubitrix/models");
 const main_helper = require("../helpers/index");
 const account_helper = require("../helpers/accounts");
 
@@ -22,6 +27,7 @@ async function delete_user(req, res) {
 async function edit_user(req, res) {
   try {
     const { id, email, password, roles } = req.body;
+
     const user_exists = await user.findOne({ _id: id });
 
     if (!user_exists) res.status(404).json({ message: "User not found!" });
@@ -55,7 +61,8 @@ async function edit_user(req, res) {
 
 async function edit_user_meta(req, res) {
   try {
-    const { address, date_of_birth, email, name, nationality, mobile } = req.body;
+    const { address, date_of_birth, email, name, nationality, mobile } =
+      req.body;
 
     const user_exists = await account_meta.findOne({ address: address });
 
@@ -70,9 +77,13 @@ async function edit_user_meta(req, res) {
         mobile,
       };
 
-      const updated = await account_meta.findOneAndUpdate({ address }, updateData, {
-        new: true,
-      });
+      const updated = await account_meta.findOneAndUpdate(
+        { address },
+        updateData,
+        {
+          new: true,
+        }
+      );
 
       if (updated) {
         return main_helper.success_response(res, updated);
@@ -119,10 +130,16 @@ async function handle_filter(req, res) {
     }
     if (req_type === "account") {
       if (req_filter && !isEmpty(req_filter)) {
-        if (req_filter?.selects && req_filter?.selects?.account_type_id != "all") {
+        if (
+          req_filter?.selects &&
+          req_filter?.selects?.account_type_id != "all"
+        ) {
           select_value = req_filter?.selects?.account_type_id;
         }
-        if (!req_filter?.search?.option || req_filter?.search?.option == "all") {
+        if (
+          !req_filter?.search?.option ||
+          req_filter?.search?.option == "all"
+        ) {
           search_option = "all";
         } else {
           search_option = req_filter?.search?.option;
@@ -240,7 +257,10 @@ async function handle_filter(req, res) {
       if (req_filter && !isEmpty(req_filter)) {
         select_tx_status_value = req_filter?.selects?.tx_status;
         select_tx_type_value = req_filter?.selects?.tx_type;
-        if (!req_filter?.search?.option || req_filter?.search?.option == "all") {
+        if (
+          !req_filter?.search?.option ||
+          req_filter?.search?.option == "all"
+        ) {
           search_option = "all";
         } else {
           search_option = req_filter?.search?.option;
@@ -251,7 +271,7 @@ async function handle_filter(req, res) {
             all_value.push(
               { tx_hash: { $regex: search_value, $options: "i" } },
               { from: { $regex: search_value, $options: "i" } },
-              { to: { $regex: search_value, $options: "i" } },
+              { to: { $regex: search_value, $options: "i" } }
             );
           } else {
             all_value = [
@@ -262,7 +282,8 @@ async function handle_filter(req, res) {
           }
         }
         if (
-          (!isEmpty(select_tx_status_value) && select_tx_status_value != "all") ||
+          (!isEmpty(select_tx_status_value) &&
+            select_tx_status_value != "all") ||
           (select_tx_type_value &&
             !isEmpty(select_tx_type_value) &&
             select_tx_type_value != "all")
@@ -310,7 +331,10 @@ async function handle_filter(req, res) {
         // select_value = req_filter?.selects?.nationality;
         select_value_account_type_id = req_filter?.selects?.account_type_id;
 
-        if (!req_filter?.search?.option || req_filter?.search?.option == "all") {
+        if (
+          !req_filter?.search?.option ||
+          req_filter?.search?.option == "all"
+        ) {
           search_option = "all";
         } else {
           search_option = req_filter?.search?.option;
@@ -322,7 +346,7 @@ async function handle_filter(req, res) {
             all_value.push(
               { name: { $regex: search_value, $options: "i" } },
               { address: { $regex: search_value, $options: "i" } },
-              { email: { $regex: search_value, $options: "i" } },
+              { email: { $regex: search_value, $options: "i" } }
             );
             if (typeof search_option == "number") {
               all_value.push({
@@ -348,7 +372,10 @@ async function handle_filter(req, res) {
         //     };
         //   }
         // }
-        if (select_value_account_type_id && select_value_account_type_id != "all") {
+        if (
+          select_value_account_type_id &&
+          select_value_account_type_id != "all"
+        ) {
           all_select_accounts_list = await accounts.find({
             account_category: select_value_account_type_id,
           });
@@ -456,7 +483,7 @@ async function handle_filter(req, res) {
         status: true,
         data: result,
         pages: Math.ceil(total_pages / limit),
-      }),
+      })
     );
   } catch (e) {
     return main_helper.error_response(res, e.message);
