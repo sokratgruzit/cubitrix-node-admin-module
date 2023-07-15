@@ -26,7 +26,7 @@ async function delete_user(req, res) {
 
 async function edit_user(req, res) {
   try {
-    const { id, email, password, roles } = req.body;
+    const { id, email, password, } = req.body;
 
     const user_exists = await user.findOne({ _id: id });
 
@@ -36,13 +36,13 @@ async function edit_user(req, res) {
       let updateData = {
         email,
         password,
-        roles,
+        name
       };
 
       if (password === "") {
         updateData = {
           email,
-          roles,
+          name,
         };
       }
 
@@ -61,8 +61,7 @@ async function edit_user(req, res) {
 
 async function edit_user_meta(req, res) {
   try {
-    const { address, date_of_birth, email, name, nationality, mobile } =
-      req.body;
+    const { address, email, name } = req.body;
 
     const user_exists = await account_meta.findOne({ address: address });
 
@@ -70,11 +69,9 @@ async function edit_user_meta(req, res) {
 
     if (user_exists) {
       let updateData = {
-        date_of_birth,
         email,
         name,
-        nationality,
-        mobile,
+        address,
       };
 
       const updated = await account_meta.findOneAndUpdate(
