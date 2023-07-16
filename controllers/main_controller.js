@@ -36,7 +36,7 @@ async function edit_user(req, res) {
       let updateData = {
         email,
         password,
-        name
+        name  
       };
 
       if (password === "") {
@@ -61,8 +61,7 @@ async function edit_user(req, res) {
 
 async function edit_user_meta(req, res) {
   try {
-    const { address, email, name } = req.body;
-
+    const { address, email, name, newAddress } = req.body;
     const user_exists = await account_meta.findOne({ address: address });
 
     if (!user_exists) res.status(404).json({ message: "User not found!" });
@@ -482,6 +481,39 @@ async function handle_filter(req, res) {
         pages: Math.ceil(total_pages / limit),
       })
     );
+  } catch (e) {
+    return main_helper.error_response(res, e.message);
+  }
+}
+
+async function edit_account(req, res) {
+  try {
+    const { externalAddress, mainAddress, systemAddress, dateOfBirth, email, _id} = req.body;
+    const user_exists = await account_meta.findOne({ address: address });
+
+    if (!user_exists) res.status(404).json({ message: "User not found!" });
+
+    if (user_exists) {
+      let updateData = {
+        email,
+        name,
+        address,
+      };
+
+      const updated = await account_meta.findOneAndUpdate(
+        { address },
+        updateData,
+        {
+          new: true,
+        }
+      );
+
+      if (updated) {
+        return main_helper.success_response(res, updated);
+      }
+
+      return main_helper.error_response(res, "could not update");
+    }
   } catch (e) {
     return main_helper.error_response(res, e.message);
   }

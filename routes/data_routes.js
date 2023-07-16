@@ -25,7 +25,7 @@ router.post(
 );
 
 router.post(
-  "/edit-account-meta",
+  "/edit-user-meta",
   verify_roles(config.roles[0]),
   main_controller.edit_user_meta
 );
