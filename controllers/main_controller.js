@@ -36,7 +36,7 @@ async function edit_user(req, res) {
       let updateData = {
         email,
         password,
-        name  
+        name
       };
 
       if (password === "") {
@@ -488,36 +488,67 @@ async function handle_filter(req, res) {
 
 async function edit_account(req, res) {
   try {
-    const { externalAddress, mainAddress, systemAddress, dateOfBirth, email, _id} = req.body;
-    const user_exists = await account_meta.findOne({ address: address });
+    const { accountData } = req.body;
 
-    if (!user_exists) res.status(404).json({ message: "User not found!" });
+    console.log(accountData, 'address');
+    const user_exists = await account_meta.findOne({ address: accountData.externalAddress });
+
+    if (!user_exists) {
+      return res.status(404).json({ message: "User not found!" });
+    }
 
     if (user_exists) {
-      let updateData = {
-        email,
-        name,
-        address,
-      };
+      let email = accountData.email;
+      let active = accountData.active;
+      let staking = accountData.staking;
+      let stakingAdmin = accountData.stakingAdmin;
+      let trade = accountData.trade;
+      let tradeAdmin = accountData.tradeAdmin;
+      let loan = accountData.loan;
+      let loanAdmin = accountData.loanAdmin;
+      let referral = accountData.referral;
+      let referralAdmin = accountData.referralAdmin;
+      let notify = accountData.notify;
+      let notifyAdmin = accountData.notifyAdmin;
 
-      const updated = await account_meta.findOneAndUpdate(
-        { address },
-        updateData,
-        {
-          new: true,
-        }
+      console.log(active, 'act?')
+      const updatedAccountMeta = await account_meta.findOneAndUpdate(
+        { address: accountData.externalAddress },
+        email,
+        { new: true }
       );
 
-      if (updated) {
-        return main_helper.success_response(res, updated);
+      const updatedAccounts = await accounts.findOneAndUpdate(
+        { account_owner: accountData.externalAddress, account_category: 'main' },
+        {
+          active: active,
+          extensions: {
+            staking,
+            stakingAdmin,
+            trade,
+            tradeAdmin,
+            loan,
+            loanAdmin,
+            referral,
+            referralAdmin,
+            notify,
+            notifyAdmin
+          },
+        },
+        { new: true }
+      );
+
+      if (updatedAccountMeta && updatedAccounts) {
+        return main_helper.success_response(res, { updatedAccountMeta, updatedAccounts });
       }
 
-      return main_helper.error_response(res, "could not update");
+      return main_helper.error_response(res, "Could not update");
     }
   } catch (e) {
     return main_helper.error_response(res, e.message);
   }
 }
+
 
 function isEmpty(obj) {
   for (var prop in obj) {
@@ -534,4 +565,5 @@ module.exports = {
   delete_user,
   edit_user,
   edit_user_meta,
+  edit_account
 };

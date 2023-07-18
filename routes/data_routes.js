@@ -13,15 +13,9 @@ router.post(
 );
 
 router.post(
-  "/edit-user",
+  "/edit-account",
   verify_roles(config.roles[0]),
-  main_controller.edit_user
-);
-
-router.post(
-  "/edit-user",
-  verify_roles(config.roles[0]),
-  main_controller.edit_user
+  main_controller.edit_account
 );
 
 router.post(
