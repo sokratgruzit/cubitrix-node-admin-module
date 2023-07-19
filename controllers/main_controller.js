@@ -509,8 +509,7 @@ async function edit_account(req, res) {
       let referralAdmin = accountData.referralAdmin;
       let notify = accountData.notify;
       let notifyAdmin = accountData.notifyAdmin;
-      console.log(active, 'active');
-      console.log(email, 'email')
+      
       const updatedAccountMeta = await account_meta.findOneAndUpdate(
         { address: accountData.externalAddress },
         { email },
