@@ -490,7 +490,6 @@ async function edit_account(req, res) {
   try {
     const { accountData } = req.body;
 
-    console.log(accountData, 'address');
     const user_exists = await account_meta.findOne({ address: accountData.externalAddress });
 
     if (!user_exists) {
@@ -510,18 +509,17 @@ async function edit_account(req, res) {
       let referralAdmin = accountData.referralAdmin;
       let notify = accountData.notify;
       let notifyAdmin = accountData.notifyAdmin;
-
-      console.log(active, 'act?')
+      console.log(active, 'active');
+      console.log(email, 'email')
       const updatedAccountMeta = await account_meta.findOneAndUpdate(
         { address: accountData.externalAddress },
-        email,
+        { email },
         { new: true }
       );
 
       const updatedAccounts = await accounts.findOneAndUpdate(
         { account_owner: accountData.externalAddress, account_category: 'main' },
         {
-          active: active,
           extensions: {
             staking,
             stakingAdmin,
@@ -534,11 +532,16 @@ async function edit_account(req, res) {
             notify,
             notifyAdmin
           },
+          active: active,
         },
         { new: true }
       );
 
-      if (updatedAccountMeta && updatedAccounts) {
+      // if (updatedAccountMeta && updatedAccounts) {
+      //   return main_helper.success_response(res, { updatedAccountMeta, updatedAccounts });
+      // }
+
+      if (updatedAccountMeta || updatedAccountMeta || updatedAccountMeta && updatedAccounts) {
         return main_helper.success_response(res, { updatedAccountMeta, updatedAccounts });
       }
 
@@ -548,7 +551,6 @@ async function edit_account(req, res) {
     return main_helper.error_response(res, e.message);
   }
 }
-
 
 function isEmpty(obj) {
   for (var prop in obj) {
