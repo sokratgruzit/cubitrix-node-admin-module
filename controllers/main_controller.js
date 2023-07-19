@@ -532,16 +532,12 @@ async function edit_account(req, res) {
             notify,
             notifyAdmin
           },
-          active: active,
+          active: active
         },
         { new: true }
       );
 
-      // if (updatedAccountMeta && updatedAccounts) {
-      //   return main_helper.success_response(res, { updatedAccountMeta, updatedAccounts });
-      // }
-
-      if (updatedAccountMeta || updatedAccountMeta || updatedAccountMeta && updatedAccounts) {
+      if (updatedAccountMeta && updatedAccounts) {
         return main_helper.success_response(res, { updatedAccountMeta, updatedAccounts });
       }
 
