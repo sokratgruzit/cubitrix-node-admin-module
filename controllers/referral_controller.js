@@ -49,45 +49,55 @@ const delete_referral_settings = async (req, res) => {
   }
 };
 
-async function testunicalc() {
-  let daysBetween = getdaysBetween();
-  let uni_days = "daily";
+async function testunicalc(req, res) {
+  let { uni_days } = req.body;
+  try {
+    let daysBetween = getdaysBetween();
 
-  const currentDate = new Date();
-  const currentDay = currentDate.getDate();
-  const currentDayOfWeek = currentDate.getDay();
+    const currentDate = new Date();
+    const currentDay = currentDate.getDate();
+    const currentDayOfWeek = currentDate.getDay();
 
-  if (uni_days == "daily") {
-    await referral_controller.uni_comission_count(1);
-  } else if ((uni_days = "montly")) {
-    if (currentDay === 1) {
-      await referral_controller.uni_comission_count(daysBetween);
+    if (uni_days == "daily") {
+      await referral_controller.uni_comission_count(1);
+    } else if ((uni_days = "monthly")) {
+      if (currentDay === 1) {
+        await referral_controller.uni_comission_count(daysBetween);
+      }
+    } else if ((uni_days = "weekly")) {
+      if (currentDayOfWeek === 1) {
+        await referral_controller.uni_comission_count(7);
+      }
     }
-  } else if ((uni_days = "weekly")) {
-    if (currentDayOfWeek === 1) {
-      await referral_controller.uni_comission_count(7);
-    }
+    return main_helper.success_response(res, "success");
+  } catch (e) {
+    return main_helper.error_response(res, e?.message || e.toString());
   }
 }
 
-async function testbinarycalc() {
-  let daysBetween = getdaysBetween();
-  let uni_days = "daily";
+async function testbinarycalc(req, res) {
+  let { uni_days } = req.body;
+  try {
+    let daysBetween = getdaysBetween();
 
-  const currentDate = new Date();
-  const currentDay = currentDate.getDate();
-  const currentDayOfWeek = currentDate.getDay();
+    const currentDate = new Date();
+    const currentDay = currentDate.getDate();
+    const currentDayOfWeek = currentDate.getDay();
 
-  if (uni_days == "daily") {
-    await referral_controller.uni_comission_count(1);
-  } else if ((uni_days = "montly")) {
-    if (currentDay === 1) {
-      await referral_controller.uni_comission_count(daysBetween);
+    if (uni_days == "daily") {
+      await referral_controller.uni_comission_count(1);
+    } else if ((uni_days = "monthly")) {
+      if (currentDay === 1) {
+        await referral_controller.uni_comission_count(daysBetween);
+      }
+    } else if ((uni_days = "weekly")) {
+      if (currentDayOfWeek === 1) {
+        await referral_controller.uni_comission_count(7);
+      }
     }
-  } else if ((uni_days = "weekly")) {
-    if (currentDayOfWeek === 1) {
-      await referral_controller.uni_comission_count(7);
-    }
+    return main_helper.success_response(res, "success");
+  } catch (e) {
+    return main_helper.error_response(res, e?.message || e.toString());
   }
 }
 
