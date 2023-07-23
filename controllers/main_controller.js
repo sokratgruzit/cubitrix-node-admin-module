@@ -527,6 +527,125 @@ async function edit_account(req, res) {
   }
 }
 
+async function total_data(req, res) {
+  try {
+    const accountsPipeline = [
+      {
+        $facet: {
+          main: [
+            {
+              $match: {
+                account_category: "main",
+              },
+            },
+            {
+              $group: {
+                _id: "$account_category",
+                totalBalance: { $sum: "$balance" },
+                totalStaked: { $sum: "$stakedTotal" },
+                totalBtc: { $sum: "$assets.btc" },
+                totalEth: { $sum: "$assets.eth" },
+                totalUsdc: { $sum: "$assets.usdc" },
+                totalGold: { $sum: "$assets.gold" },
+                totalPlatinum: { $sum: "$assets.platinum" },
+              },
+            },
+          ],
+          others: [
+            {
+              $match: {
+                account_category: { $in: ["trade", "loan"] },
+              },
+            },
+            {
+              $group: {
+                _id: "$account_category",
+                totalBalance: { $sum: "$balance" },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          data: { $concatArrays: ["$main", "$others"] },
+        },
+      },
+      { $unwind: "$data" },
+      {
+        $replaceRoot: {
+          newRoot: "$data",
+        },
+      },
+    ];
+
+    const transactionsPipeline = [
+      {
+        $match: {
+          tx_status: "approved",
+          tx_type: "withdrawal",
+          "tx_options.currency": {
+            $in: ["ATR", "btc", "eth", "usdc", "gold", "platinum"],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$tx_options.currency",
+          totalAmount: { $sum: "$amount" },
+        },
+      },
+    ];
+
+    const [accounts_data, transactions_data] = await Promise.all([
+      accounts.aggregate(accountsPipeline),
+      transactions.aggregate(transactionsPipeline),
+    ]);
+
+    let transformedAccounts = {};
+    if (accounts_data.length > 0) {
+      transformedAccounts = accounts_data.reduce((acc, curr) => {
+        acc[curr._id] = curr;
+        delete acc[curr._id]._id;
+        return acc;
+      }, {});
+    } else {
+      transformedAccounts = {
+        main: {
+          totalBalance: 0,
+          totalStaked: 0,
+          totalBtc: 0,
+          totalEth: 0,
+          totalUsdc: 0,
+          totalGold: 0,
+          totalPlatinum: 0,
+        },
+        trade: { totalBalance: 0 },
+        loan: { totalBalance: 0 },
+      };
+    }
+    let transformedTransactions = {};
+    if (transactions_data.length > 0) {
+      transformedTransactions = transactions_data.reduce((acc, curr) => {
+        acc[curr._id] = curr.totalAmount;
+        return acc;
+      }, {});
+    } else {
+      transformedTransactions = { ATR: 0, btc: 0, eth: 0, usdc: 0, gold: 0, platinum: 0 };
+    }
+
+    const result = {
+      accounts: transformedAccounts,
+      withdrawals: transformedTransactions,
+    };
+
+    res.status(200).send(result);
+  } catch (e) {
+    console.log(e);
+    return main_helper.error_response(res, e.message);
+  }
+}
+
 function isEmpty(obj) {
   for (var prop in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, prop)) {
@@ -543,4 +662,5 @@ module.exports = {
   edit_user,
   edit_user_meta,
   edit_account,
+  total_data,
 };
