@@ -21,11 +21,15 @@ router.post("/edit_referral_setting", referral_settings.edit_referral_setting);
 router.post("/delete_referral_settings", referral_settings.delete_referral_settings);
 router.post("/get_referral_setting", referral_settings.get_referral_setting);
 
-router.post("/testunicalc", verify_roles(config.roles[0]), referral_settings.testunicalc);
+router.post(
+  "/testunicalc",
+  verify_roles(config.roles[0]),
+  referral_settings.testunicalc
+);
 router.post(
   "/testbinarycalc",
   verify_roles(config.roles[0]),
-  referral_settings.testbinarycalc,
+  referral_settings.testbinarycalc
 );
 
 // transactions
