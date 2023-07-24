@@ -39,4 +39,6 @@ router.post(
 );
 router.post("/edit_transaction", transaction_controller.edit_transaction);
 
+router.post("/total_data", main_controller.total_data);
+
 module.exports = router;
