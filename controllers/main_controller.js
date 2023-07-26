@@ -88,6 +88,63 @@ async function dashboard_accounts(req, res){
   }
 }
 
+async function rewards_data(req, res){
+  try{
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    
+    let rewards = await transactions.aggregate([
+      {
+        $match: {
+          tx_type: "bonus",
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          todaySum: {
+            $sum: {
+              $cond: [{ $gte: ["$createdAt", today] }, "$amount", 0]
+            }
+          },
+          thisMonthSum: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $gte: ["$createdAt", new Date(today.getFullYear(), today.getMonth(), 1)] },
+                    { $lt: ["$createdAt", new Date(today.getFullYear(), today.getMonth() + 1, 1)] }
+                  ]
+                },
+                "$amount",
+                0
+              ]
+            }
+          },
+          thisYearSum: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $gte: ["$createdAt", new Date(today.getFullYear(), 0, 1)] },
+                    { $lt: ["$createdAt", new Date(today.getFullYear() + 1, 0, 1)] }
+                  ]
+                },
+                "$amount",
+                0
+              ]
+            }
+          }
+        }
+      }
+    ])
+   return main_helper.success_response(res, rewards);
+  }catch(e){
+console.log(e.message);
+return main_helper.error_response(res, "error");
+  }
+}
+
 async function delete_user(req, res) {
   try {
     const { email } = req.body;
@@ -750,4 +807,5 @@ module.exports = {
   dashboard_accounts,
   edit_account,
   total_data,
+  rewards_data
 };
