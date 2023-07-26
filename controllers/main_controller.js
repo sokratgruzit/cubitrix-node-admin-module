@@ -1,9 +1,4 @@
-const {
-  accounts,
-  transactions,
-  account_meta,
-  user,
-} = require("@cubitrix/models");
+const { accounts, transactions, account_meta, user } = require("@cubitrix/models");
 const main_helper = require("../helpers/index");
 const account_helper = require("../helpers/accounts");
 const axios = require('axios');
@@ -112,7 +107,7 @@ async function delete_user(req, res) {
 
 async function edit_user(req, res) {
   try {
-    const { id, email, password, roles } = req.body;
+    const { id, email, password } = req.body;
 
     const user_exists = await user.findOne({ _id: id });
 
@@ -122,13 +117,13 @@ async function edit_user(req, res) {
       let updateData = {
         email,
         password,
-        roles,
+        name,
       };
 
       if (password === "") {
         updateData = {
           email,
-          roles,
+          name,
         };
       }
 
@@ -147,29 +142,21 @@ async function edit_user(req, res) {
 
 async function edit_user_meta(req, res) {
   try {
-    const { address, date_of_birth, email, name, nationality, mobile } =
-      req.body;
-
+    const { address, email, name, newAddress } = req.body;
     const user_exists = await account_meta.findOne({ address: address });
 
     if (!user_exists) res.status(404).json({ message: "User not found!" });
 
     if (user_exists) {
       let updateData = {
-        date_of_birth,
         email,
         name,
-        nationality,
-        mobile,
+        address,
       };
 
-      const updated = await account_meta.findOneAndUpdate(
-        { address },
-        updateData,
-        {
-          new: true,
-        }
-      );
+      const updated = await account_meta.findOneAndUpdate({ address }, updateData, {
+        new: true,
+      });
 
       if (updated) {
         return main_helper.success_response(res, updated);
@@ -216,16 +203,10 @@ async function handle_filter(req, res) {
     }
     if (req_type === "account") {
       if (req_filter && !isEmpty(req_filter)) {
-        if (
-          req_filter?.selects &&
-          req_filter?.selects?.account_type_id != "all"
-        ) {
+        if (req_filter?.selects && req_filter?.selects?.account_type_id != "all") {
           select_value = req_filter?.selects?.account_type_id;
         }
-        if (
-          !req_filter?.search?.option ||
-          req_filter?.search?.option == "all"
-        ) {
+        if (!req_filter?.search?.option || req_filter?.search?.option == "all") {
           search_option = "all";
         } else {
           search_option = req_filter?.search?.option;
@@ -343,21 +324,20 @@ async function handle_filter(req, res) {
       if (req_filter && !isEmpty(req_filter)) {
         select_tx_status_value = req_filter?.selects?.tx_status;
         select_tx_type_value = req_filter?.selects?.tx_type;
-        if (
-          !req_filter?.search?.option ||
-          req_filter?.search?.option == "all"
-        ) {
+
+        if (!req_filter?.search?.option || req_filter?.search?.option == "all") {
           search_option = "all";
         } else {
           search_option = req_filter?.search?.option;
         }
         search_value = req_filter?.search?.value;
+
         if (search_value) {
           if (search_option == "all") {
             all_value.push(
               { tx_hash: { $regex: search_value, $options: "i" } },
               { from: { $regex: search_value, $options: "i" } },
-              { to: { $regex: search_value, $options: "i" } }
+              { to: { $regex: search_value, $options: "i" } },
             );
           } else {
             all_value = [
@@ -368,8 +348,7 @@ async function handle_filter(req, res) {
           }
         }
         if (
-          (!isEmpty(select_tx_status_value) &&
-            select_tx_status_value != "all") ||
+          (!isEmpty(select_tx_status_value) && select_tx_status_value != "all") ||
           (select_tx_type_value &&
             !isEmpty(select_tx_type_value) &&
             select_tx_type_value != "all")
@@ -391,9 +370,7 @@ async function handle_filter(req, res) {
             final_value.push({ tx_type: select_tx_type_value });
           }
 
-          search_query = {
-            $and: final_value,
-          };
+          search_query = final_value.length > 1 ? { $and: final_value } : final_value[0];
         } else {
           search_query = { $or: all_value };
         }
@@ -405,11 +382,11 @@ async function handle_filter(req, res) {
         total_pages = await transactions.count(search_query);
       } else {
         result = await transactions
-          .find(data)
+          .find()
           .sort({ createdAt: "desc" })
           .limit(limit)
           .skip(limit * (req_page - 1));
-        total_pages = await transactions.count(data);
+        total_pages = await transactions.count();
       }
     }
     if (req_type === "users") {
@@ -417,10 +394,7 @@ async function handle_filter(req, res) {
         // select_value = req_filter?.selects?.nationality;
         select_value_account_type_id = req_filter?.selects?.account_type_id;
 
-        if (
-          !req_filter?.search?.option ||
-          req_filter?.search?.option == "all"
-        ) {
+        if (!req_filter?.search?.option || req_filter?.search?.option == "all") {
           search_option = "all";
         } else {
           search_option = req_filter?.search?.option;
@@ -429,15 +403,18 @@ async function handle_filter(req, res) {
 
         if (search_option == "all") {
           if (search_value) {
-            all_value.push(
-              { name: { $regex: search_value, $options: "i" } },
-              { address: { $regex: search_value, $options: "i" } },
-              { email: { $regex: search_value, $options: "i" } }
-            );
-            if (typeof search_option == "number") {
-              all_value.push({
-                mobile: { $regex: search_value, $options: "i" },
-              });
+            if (search_option == "all") {
+              all_value.push(
+                { tx_hash: { $regex: search_value, $options: "i" } },
+                { from: { $regex: search_value, $options: "i" } },
+                { to: { $regex: search_value, $options: "i" } },
+              );
+            } else {
+              all_value = [
+                {
+                  [search_option]: { $regex: search_value, $options: "i" },
+                },
+              ];
             }
           }
         } else {
@@ -458,10 +435,7 @@ async function handle_filter(req, res) {
         //     };
         //   }
         // }
-        if (
-          select_value_account_type_id &&
-          select_value_account_type_id != "all"
-        ) {
+        if (select_value_account_type_id && select_value_account_type_id != "all") {
           all_select_accounts_list = await accounts.find({
             account_category: select_value_account_type_id,
           });
@@ -569,9 +543,191 @@ async function handle_filter(req, res) {
         status: true,
         data: result,
         pages: Math.ceil(total_pages / limit),
-      })
+      }),
     );
   } catch (e) {
+    return main_helper.error_response(res, e.message);
+  }
+}
+
+async function edit_account(req, res) {
+  try {
+    const { accountData } = req.body;
+
+    const user_exists = await account_meta.findOne({
+      address: accountData.externalAddress,
+    });
+
+    if (!user_exists) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    if (user_exists) {
+      let email = accountData.email;
+      let active = accountData.active;
+      let staking = accountData.staking;
+      let stakingAdmin = accountData.stakingAdmin;
+      let trade = accountData.trade;
+      let tradeAdmin = accountData.tradeAdmin;
+      let loan = accountData.loan;
+      let loanAdmin = accountData.loanAdmin;
+      let referral = accountData.referral;
+      let referralAdmin = accountData.referralAdmin;
+      let notify = accountData.notify;
+      let notifyAdmin = accountData.notifyAdmin;
+
+      const updatedAccountMeta = await account_meta.findOneAndUpdate(
+        { address: accountData.externalAddress },
+        { email },
+        { new: true },
+      );
+
+      const updatedAccounts = await accounts.findOneAndUpdate(
+        { account_owner: accountData.externalAddress, account_category: "main" },
+        {
+          extensions: {
+            staking,
+            stakingAdmin,
+            trade,
+            tradeAdmin,
+            loan,
+            loanAdmin,
+            referral,
+            referralAdmin,
+            notify,
+            notifyAdmin,
+          },
+          active: active,
+        },
+        { new: true },
+      );
+
+      if (updatedAccountMeta && updatedAccounts) {
+        return main_helper.success_response(res, { updatedAccountMeta, updatedAccounts });
+      }
+
+      return main_helper.error_response(res, "Could not update");
+    }
+  } catch (e) {
+    return main_helper.error_response(res, e.message);
+  }
+}
+
+async function total_data(req, res) {
+  try {
+    const accountsPipeline = [
+      {
+        $facet: {
+          main: [
+            {
+              $match: {
+                account_category: "main",
+              },
+            },
+            {
+              $group: {
+                _id: "$account_category",
+                totalBalance: { $sum: "$balance" },
+                totalStaked: { $sum: "$stakedTotal" },
+                totalBtc: { $sum: "$assets.btc" },
+                totalEth: { $sum: "$assets.eth" },
+                totalUsdc: { $sum: "$assets.usdc" },
+                totalGold: { $sum: "$assets.gold" },
+                totalPlatinum: { $sum: "$assets.platinum" },
+              },
+            },
+          ],
+          others: [
+            {
+              $match: {
+                account_category: { $in: ["trade", "loan"] },
+              },
+            },
+            {
+              $group: {
+                _id: "$account_category",
+                totalBalance: { $sum: "$balance" },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          data: { $concatArrays: ["$main", "$others"] },
+        },
+      },
+      { $unwind: "$data" },
+      {
+        $replaceRoot: {
+          newRoot: "$data",
+        },
+      },
+    ];
+
+    const transactionsPipeline = [
+      {
+        $match: {
+          tx_status: "approved",
+          tx_type: "withdrawal",
+          "tx_options.currency": {
+            $in: ["ATR", "btc", "eth", "usdc", "gold", "platinum"],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$tx_options.currency",
+          totalAmount: { $sum: "$amount" },
+        },
+      },
+    ];
+
+    const [accounts_data, transactions_data] = await Promise.all([
+      accounts.aggregate(accountsPipeline),
+      transactions.aggregate(transactionsPipeline),
+    ]);
+
+    let transformedAccounts = {};
+    if (accounts_data.length > 0) {
+      transformedAccounts = accounts_data.reduce((acc, curr) => {
+        acc[curr._id] = curr;
+        delete acc[curr._id]._id;
+        return acc;
+      }, {});
+    } else {
+      transformedAccounts = {
+        main: {
+          totalBalance: 0,
+          totalStaked: 0,
+          totalBtc: 0,
+          totalEth: 0,
+          totalUsdc: 0,
+          totalGold: 0,
+          totalPlatinum: 0,
+        },
+        trade: { totalBalance: 0 },
+        loan: { totalBalance: 0 },
+      };
+    }
+    let transformedTransactions = {};
+    if (transactions_data.length > 0) {
+      transformedTransactions = transactions_data.reduce((acc, curr) => {
+        acc[curr._id] = curr.totalAmount;
+        return acc;
+      }, {});
+    } else {
+      transformedTransactions = { ATR: 0, btc: 0, eth: 0, usdc: 0, gold: 0, platinum: 0 };
+    }
+
+    const result = {
+      accounts: transformedAccounts,
+      withdrawals: transformedTransactions,
+    };
+
+    res.status(200).send(result);
+  } catch (e) {
+    console.log(e);
     return main_helper.error_response(res, e.message);
   }
 }
@@ -591,5 +747,7 @@ module.exports = {
   delete_user,
   edit_user,
   edit_user_meta,
-  dashboard_accounts
+  dashboard_accounts,
+  edit_account,
+  total_data,
 };
