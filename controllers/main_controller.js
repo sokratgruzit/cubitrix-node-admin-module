@@ -17,7 +17,7 @@ async function dashboard_accounts(req, res){
       {
         $match: {
           tx_type: "withdraw",
-          // tx_status:"approved"
+          tx_status:"approved"
         }
       },
       {
