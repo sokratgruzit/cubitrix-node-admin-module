@@ -6,6 +6,92 @@ const {
 } = require("@cubitrix/models");
 const main_helper = require("../helpers/index");
 const account_helper = require("../helpers/accounts");
+const axios = require('axios');
+const _ = require('lodash');
+
+
+async function dashboard_accounts(req, res){
+  try{
+
+    // let responseData = await axios
+    //   .get("https://api.coinbase.com/v2/accounts", {
+    //       'Authorization': `Bearer ${process.env.COINBASE_API_KEY}`
+    //   });
+    //   console.log(responseData?.data);
+    let withdrawals = await transactions.aggregate([
+      {
+        $match: {
+          tx_type: "withdraw",
+          // tx_status:"approved"
+        }
+      },
+      {
+        $group: {
+          _id: "$tx_options.currency",
+          totalAmount: { $sum: "$amount" }
+        }
+      }
+    ]);
+    let pendings = await accounts.aggregate([
+      {
+        $match: {
+          account_category: {$in:["main"]}
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          atrSum: { $sum: "$balance" },
+          btcSum: { $sum: "$assets.btc" },
+          ethSum: { $sum: "$assets.eth" },
+          usdcSum: { $sum: "$assets.usdc" },
+          goldSum: { $sum: "$assets.gold" },
+          platinumSum: { $sum: "$assets.platinum" },
+        }
+      },
+    ]);
+    let atarTotalSupply=100000000;
+    let incomings=null;
+    let resultData = {
+      atar:{
+        incoming:atarTotalSupply,
+        withdrawals:_.find(withdrawals, {_id:"ATR"})?_.find(withdrawals, {_id:"ATR"})?.totalAmount:0, 
+        pendings:pendings[0]?.atrSum
+      },
+      btc:{
+        incoming:_.find(incomings, {asset:"BTC"})?_.find(incomings, {asset:"BTC"})?.balance:0,
+        withdrawals:_.find(withdrawals, {_id:"BTC"})?_.find(withdrawals, {_id:"BTC"})?.totalAmount:0, 
+        pendings:pendings[0]?.btcSum
+      },
+      eth:{
+        incoming:_.find(incomings, {asset:"ETH"})?_.find(incomings, {asset:"ETH"})?.balance:0,
+        withdrawals:_.find(withdrawals, {_id:"ETH"})?_.find(withdrawals, {_id:"ETH"})?.totalAmount:0, 
+        pendings:pendings[0]?.ethSum
+      },
+      usdc:{
+        incoming:_.find(incomings, {asset:"USDT"})?_.find(incomings, {asset:"USDT"})?.balance:0,
+        withdrawals:_.find(withdrawals, {_id:"USDT"})?_.find(withdrawals, {_id:"USDT"})?.totalAmount:0, 
+        pendings:pendings[0]?.usdcSum
+      },
+      gold:{
+        incoming:_.find(incomings, {asset:"GOLD"})?_.find(incomings, {asset:"GOLD"})?.balance:0,
+        withdrawals:_.find(withdrawals, {_id:"GOLD"})?_.find(withdrawals, {_id:"GOLD"})?.totalAmount:0, 
+        pendings:pendings[0]?.goldSum
+      },
+      platinum:{
+        incoming:_.find(incomings, {asset:"PLATINIUM"})?_.find(incomings, {asset:"PLATINIUM"})?.balance:0,
+        withdrawals:_.find(withdrawals, {_id:"PLATINUM"})?_.find(withdrawals, {_id:"PLATINUM"})?.totalAmount:0, 
+        pendings:pendings[0]?.platinumSum
+      }
+    }
+    return res.status(200).send({ success: true, resultData });
+
+
+  }catch(e){
+    console.log(e.message);
+    return main_helper.error_response(res, "error");
+  }
+}
 
 async function delete_user(req, res) {
   try {
@@ -505,4 +591,5 @@ module.exports = {
   delete_user,
   edit_user,
   edit_user_meta,
+  dashboard_accounts
 };
