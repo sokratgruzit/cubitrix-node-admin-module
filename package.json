@@ -11,6 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@cubitrix/models": ">=0.0.77",
+    "axios": "^1.4.0",
     "bcryptjs": "^2.4.3",
     "config": "^3.3.9",
     "cors": "^2.8.5",
@@ -19,6 +20,7 @@
     "express-validator": "^6.14.3",
     "jsonwebtoken": "^9.0.0",
     "jwt-decode": "^3.1.2",
+    "lodash": "^4.17.21",
     "mongoose": "^6.9.0",
     "nodemailer": "^6.8.0"
   },
