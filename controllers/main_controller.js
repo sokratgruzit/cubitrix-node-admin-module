@@ -88,7 +88,7 @@ async function dashboard_accounts(req, res){
   }
 }
 
-async function rewards_data(req, res){
+async function rewards_data(){
   try{
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
@@ -137,11 +137,11 @@ async function rewards_data(req, res){
           }
         }
       }
-    ])
-   return main_helper.success_response(res, rewards);
+    ]);
+   return main_helper.success_message( rewards);
   }catch(e){
-console.log(e.message);
-return main_helper.error_response(res, "error");
+    console.log(e.message);
+    return main_helper.error_message("error");
   }
 }
 
@@ -777,9 +777,11 @@ async function total_data(req, res) {
       transformedTransactions = { ATR: 0, btc: 0, eth: 0, usdc: 0, gold: 0, platinum: 0 };
     }
 
+
     const result = {
       accounts: transformedAccounts,
       withdrawals: transformedTransactions,
+      rewards:await rewards_data()
     };
 
     res.status(200).send(result);
@@ -806,6 +808,5 @@ module.exports = {
   edit_user_meta,
   dashboard_accounts,
   edit_account,
-  total_data,
-  rewards_data
+  total_data
 };
