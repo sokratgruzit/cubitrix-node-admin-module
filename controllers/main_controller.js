@@ -1,13 +1,11 @@
 const { accounts, transactions, account_meta, user } = require("@cubitrix/models");
 const main_helper = require("../helpers/index");
 const account_helper = require("../helpers/accounts");
-const axios = require('axios');
-const _ = require('lodash');
+const axios = require("axios");
+const _ = require("lodash");
 
-
-async function dashboard_accounts(req, res){
-  try{
-
+async function dashboard_accounts(req, res) {
+  try {
     // let responseData = await axios
     //   .get("https://api.coinbase.com/v2/accounts", {
     //       'Authorization': `Bearer ${process.env.COINBASE_API_KEY}`
@@ -17,21 +15,21 @@ async function dashboard_accounts(req, res){
       {
         $match: {
           tx_type: "withdraw",
-          tx_status:"approved"
-        }
+          tx_status: "approved",
+        },
       },
       {
         $group: {
           _id: "$tx_options.currency",
-          totalAmount: { $sum: "$amount" }
-        }
-      }
+          totalAmount: { $sum: "$amount" },
+        },
+      },
     ]);
     let pendings = await accounts.aggregate([
       {
         $match: {
-          account_category: {$in:["main"]}
-        }
+          account_category: { $in: ["main"] },
+        },
       },
       {
         $group: {
@@ -42,84 +40,114 @@ async function dashboard_accounts(req, res){
           usdcSum: { $sum: "$assets.usdc" },
           goldSum: { $sum: "$assets.gold" },
           platinumSum: { $sum: "$assets.platinum" },
-        }
+        },
       },
     ]);
-    let atarTotalSupply=100000000;
-    let incomings=null;
+    let atarTotalSupply = 100000000;
+    let incomings = null;
     let resultData = {
-      atar:{
-        incoming:atarTotalSupply,
-        withdrawals:_.find(withdrawals, {_id:"ATR"})?_.find(withdrawals, {_id:"ATR"})?.totalAmount:0, 
-        pendings:pendings[0]?.atrSum
+      atar: {
+        incoming: atarTotalSupply,
+        withdrawals: _.find(withdrawals, { _id: "ATR" })
+          ? _.find(withdrawals, { _id: "ATR" })?.totalAmount
+          : 0,
+        pendings: pendings[0]?.atrSum,
       },
-      btc:{
-        incoming:_.find(incomings, {asset:"BTC"})?_.find(incomings, {asset:"BTC"})?.balance:0,
-        withdrawals:_.find(withdrawals, {_id:"BTC"})?_.find(withdrawals, {_id:"BTC"})?.totalAmount:0, 
-        pendings:pendings[0]?.btcSum
+      btc: {
+        incoming: _.find(incomings, { asset: "BTC" })
+          ? _.find(incomings, { asset: "BTC" })?.balance
+          : 0,
+        withdrawals: _.find(withdrawals, { _id: "BTC" })
+          ? _.find(withdrawals, { _id: "BTC" })?.totalAmount
+          : 0,
+        pendings: pendings[0]?.btcSum,
       },
-      eth:{
-        incoming:_.find(incomings, {asset:"ETH"})?_.find(incomings, {asset:"ETH"})?.balance:0,
-        withdrawals:_.find(withdrawals, {_id:"ETH"})?_.find(withdrawals, {_id:"ETH"})?.totalAmount:0, 
-        pendings:pendings[0]?.ethSum
+      eth: {
+        incoming: _.find(incomings, { asset: "ETH" })
+          ? _.find(incomings, { asset: "ETH" })?.balance
+          : 0,
+        withdrawals: _.find(withdrawals, { _id: "ETH" })
+          ? _.find(withdrawals, { _id: "ETH" })?.totalAmount
+          : 0,
+        pendings: pendings[0]?.ethSum,
       },
-      usdc:{
-        incoming:_.find(incomings, {asset:"USDT"})?_.find(incomings, {asset:"USDT"})?.balance:0,
-        withdrawals:_.find(withdrawals, {_id:"USDT"})?_.find(withdrawals, {_id:"USDT"})?.totalAmount:0, 
-        pendings:pendings[0]?.usdcSum
+      usdc: {
+        incoming: _.find(incomings, { asset: "USDT" })
+          ? _.find(incomings, { asset: "USDT" })?.balance
+          : 0,
+        withdrawals: _.find(withdrawals, { _id: "USDT" })
+          ? _.find(withdrawals, { _id: "USDT" })?.totalAmount
+          : 0,
+        pendings: pendings[0]?.usdcSum,
       },
-      gold:{
-        incoming:_.find(incomings, {asset:"GOLD"})?_.find(incomings, {asset:"GOLD"})?.balance:0,
-        withdrawals:_.find(withdrawals, {_id:"GOLD"})?_.find(withdrawals, {_id:"GOLD"})?.totalAmount:0, 
-        pendings:pendings[0]?.goldSum
+      gold: {
+        incoming: _.find(incomings, { asset: "GOLD" })
+          ? _.find(incomings, { asset: "GOLD" })?.balance
+          : 0,
+        withdrawals: _.find(withdrawals, { _id: "GOLD" })
+          ? _.find(withdrawals, { _id: "GOLD" })?.totalAmount
+          : 0,
+        pendings: pendings[0]?.goldSum,
       },
-      platinum:{
-        incoming:_.find(incomings, {asset:"PLATINIUM"})?_.find(incomings, {asset:"PLATINIUM"})?.balance:0,
-        withdrawals:_.find(withdrawals, {_id:"PLATINUM"})?_.find(withdrawals, {_id:"PLATINUM"})?.totalAmount:0, 
-        pendings:pendings[0]?.platinumSum
-      }
-    }
+      platinum: {
+        incoming: _.find(incomings, { asset: "PLATINIUM" })
+          ? _.find(incomings, { asset: "PLATINIUM" })?.balance
+          : 0,
+        withdrawals: _.find(withdrawals, { _id: "PLATINUM" })
+          ? _.find(withdrawals, { _id: "PLATINUM" })?.totalAmount
+          : 0,
+        pendings: pendings[0]?.platinumSum,
+      },
+    };
     return res.status(200).send({ success: true, resultData });
-
-
-  }catch(e){
+  } catch (e) {
     console.log(e.message);
     return main_helper.error_response(res, "error");
   }
 }
 
-async function rewards_data(){
-  try{
+async function rewards_data() {
+  try {
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
-    
+
     let rewards = await transactions.aggregate([
       {
         $match: {
           tx_type: "bonus",
-        }
+        },
       },
       {
         $group: {
           _id: null,
           todaySum: {
             $sum: {
-              $cond: [{ $gte: ["$createdAt", today] }, "$amount", 0]
-            }
+              $cond: [{ $gte: ["$createdAt", today] }, "$amount", 0],
+            },
           },
           thisMonthSum: {
             $sum: {
               $cond: [
                 {
                   $and: [
-                    { $gte: ["$createdAt", new Date(today.getFullYear(), today.getMonth(), 1)] },
-                    { $lt: ["$createdAt", new Date(today.getFullYear(), today.getMonth() + 1, 1)] }
-                  ]
+                    {
+                      $gte: [
+                        "$createdAt",
+                        new Date(today.getFullYear(), today.getMonth(), 1),
+                      ],
+                    },
+                    {
+                      $lt: [
+                        "$createdAt",
+                        new Date(today.getFullYear(), today.getMonth() + 1, 1),
+                      ],
+                    },
+                  ],
                 },
                 "$amount",
-                0
-              ]
-            }
+                0,
+              ],
+            },
           },
           thisYearSum: {
             $sum: {
@@ -127,19 +155,19 @@ async function rewards_data(){
                 {
                   $and: [
                     { $gte: ["$createdAt", new Date(today.getFullYear(), 0, 1)] },
-                    { $lt: ["$createdAt", new Date(today.getFullYear() + 1, 0, 1)] }
-                  ]
+                    { $lt: ["$createdAt", new Date(today.getFullYear() + 1, 0, 1)] },
+                  ],
                 },
                 "$amount",
-                0
-              ]
-            }
-          }
-        }
-      }
+                0,
+              ],
+            },
+          },
+        },
+      },
     ]);
-   return main_helper.success_message( rewards);
-  }catch(e){
+    return main_helper.success_message(rewards);
+  } catch (e) {
     console.log(e.message);
     return main_helper.error_message("error");
   }
@@ -722,11 +750,11 @@ async function total_data(req, res) {
       },
     ];
 
-    const transactionsPipeline = [
+    const transactionsPipelineApproved = [
       {
         $match: {
           tx_status: "approved",
-          tx_type: "withdrawal",
+          tx_type: "withdraw",
           "tx_options.currency": {
             $in: ["ATR", "btc", "eth", "usdc", "gold", "platinum"],
           },
@@ -740,10 +768,12 @@ async function total_data(req, res) {
       },
     ];
 
-    const [accounts_data, transactions_data] = await Promise.all([
-      accounts.aggregate(accountsPipeline),
-      transactions.aggregate(transactionsPipeline),
-    ]);
+    const [accounts_data, transactions_data_approved, rewards_data_result] =
+      await Promise.all([
+        accounts.aggregate(accountsPipeline),
+        transactions.aggregate(transactionsPipelineApproved),
+        rewards_data(),
+      ]);
 
     let transformedAccounts = {};
     if (accounts_data.length > 0) {
@@ -767,21 +797,27 @@ async function total_data(req, res) {
         loan: { totalBalance: 0 },
       };
     }
-    let transformedTransactions = {};
-    if (transactions_data.length > 0) {
-      transformedTransactions = transactions_data.reduce((acc, curr) => {
+    let transformedTransactionsApproved = {};
+    if (transactions_data_approved.length > 0) {
+      transformedTransactionsApproved = transactions_data_approved.reduce((acc, curr) => {
         acc[curr._id] = curr.totalAmount;
         return acc;
       }, {});
     } else {
-      transformedTransactions = { ATR: 0, btc: 0, eth: 0, usdc: 0, gold: 0, platinum: 0 };
+      transformedTransactionsApproved = {
+        ATR: 0,
+        btc: 0,
+        eth: 0,
+        usdc: 0,
+        gold: 0,
+        platinum: 0,
+      };
     }
-
 
     const result = {
       accounts: transformedAccounts,
-      withdrawals: transformedTransactions,
-      rewards:await rewards_data()
+      withdrawals: transformedTransactionsApproved,
+      rewards: rewards_data_result,
     };
 
     res.status(200).send(result);
@@ -808,5 +844,5 @@ module.exports = {
   edit_user_meta,
   dashboard_accounts,
   edit_account,
-  total_data
+  total_data,
 };
