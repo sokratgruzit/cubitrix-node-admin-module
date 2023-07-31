@@ -65,7 +65,6 @@ const change_transaction_status = async (req, res) => {
       const currency = tx?.tx_options?.currency?.toUpperCase();
       const currentWithdrawalAmount = treasury.withdrawals[currency] || 0;
       const currentIncomingAmount = treasury.incoming[currency] || 0;
-      console.log(currentWithdrawalAmount, tx.amount, currentIncomingAmount);
       if (currentWithdrawalAmount + tx.amount > currentIncomingAmount) {
         return main_helper.error_response(
           res,
