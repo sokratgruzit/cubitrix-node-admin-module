@@ -78,6 +78,7 @@ const change_transaction_status = async (req, res) => {
             $inc: {
               [`withdrawals.${currency}`]: Number(tx.amount),
               [`pendingWithdrawals.${currency}`]: 0 - tx.amount,
+              [`incoming.${currency}`]: 0 - tx.amount,
             },
           },
         ),
