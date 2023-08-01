@@ -63,9 +63,9 @@ const change_transaction_status = async (req, res) => {
 
     if (tx.tx_status == "pending" && tx_status == "approved") {
       const currency = tx?.tx_options?.currency?.toUpperCase();
-      const currentWithdrawalAmount = treasury.withdrawals[currency] || 0;
+      const pendingWithdrawalAmount = treasury.pendingWithdrawals[currency] || 0;
       const currentIncomingAmount = treasury.incoming[currency] || 0;
-      if (currentWithdrawalAmount + tx.amount > currentIncomingAmount) {
+      if (pendingWithdrawalAmount + tx.amount > currentIncomingAmount) {
         return main_helper.error_response(
           res,
           "Insufficient funds for withdrawal in treasury",
@@ -77,6 +77,7 @@ const change_transaction_status = async (req, res) => {
           {
             $inc: {
               [`withdrawals.${currency}`]: tx.amount,
+              [`pendingWithdrawals.${currency}`]: -tx.amount,
             },
           },
         ),

@@ -750,6 +750,24 @@ async function total_data(req, res) {
       },
     ];
 
+    const transactionsPipelinePending = [
+      {
+        $match: {
+          tx_status: "pending",
+          tx_type: "withdraw",
+          "tx_options.currency": {
+            $in: ["ATR", "btc", "eth", "usdc", "gold", "platinum"],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$tx_options.currency",
+          totalAmount: { $sum: "$amount" },
+        },
+      },
+    ];
+
     const transactionsPipelineApproved = [
       {
         $match: {
@@ -768,12 +786,17 @@ async function total_data(req, res) {
       },
     ];
 
-    const [accounts_data, transactions_data_approved, rewards_data_result] =
-      await Promise.all([
-        accounts.aggregate(accountsPipeline),
-        transactions.aggregate(transactionsPipelineApproved),
-        rewards_data(),
-      ]);
+    const [
+      accounts_data,
+      transactions_data_approved,
+      transactions_data_pending,
+      rewards_data_result,
+    ] = await Promise.all([
+      accounts.aggregate(accountsPipeline),
+      transactions.aggregate(transactionsPipelineApproved),
+      transactions.aggregate(transactionsPipelinePending),
+      rewards_data(),
+    ]);
 
     let transformedAccounts = {};
     if (accounts_data.length > 0) {
@@ -814,8 +837,26 @@ async function total_data(req, res) {
       };
     }
 
+    let transformedTransactionsPending = {};
+    if (transactions_data_pending.length > 0) {
+      transformedTransactionsPending = transactions_data_pending.reduce((acc, curr) => {
+        acc[curr._id] = curr.totalAmount;
+        return acc;
+      }, {});
+    } else {
+      transformedTransactionsPending = {
+        ATR: 0,
+        btc: 0,
+        eth: 0,
+        usdc: 0,
+        gold: 0,
+        platinum: 0,
+      };
+    }
+
     const result = {
       accounts: transformedAccounts,
+      pendingWithdrawals: transformedTransactionsPending,
       withdrawals: transformedTransactionsApproved,
       rewards: rewards_data_result,
     };
