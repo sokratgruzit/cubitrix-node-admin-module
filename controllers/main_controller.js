@@ -1,4 +1,10 @@
-const { accounts, transactions, account_meta, user } = require("@cubitrix/models");
+const {
+  accounts,
+  transactions,
+  account_meta,
+  user,
+  treasuries,
+} = require("@cubitrix/models");
 const main_helper = require("../helpers/index");
 const account_helper = require("../helpers/accounts");
 const axios = require("axios");
@@ -791,11 +797,13 @@ async function total_data(req, res) {
       transactions_data_approved,
       transactions_data_pending,
       rewards_data_result,
+      treasuries_data,
     ] = await Promise.all([
       accounts.aggregate(accountsPipeline),
       transactions.aggregate(transactionsPipelineApproved),
       transactions.aggregate(transactionsPipelinePending),
       rewards_data(),
+      treasuries.findOne({}),
     ]);
 
     let transformedAccounts = {};
@@ -859,6 +867,7 @@ async function total_data(req, res) {
       pendingWithdrawals: transformedTransactionsPending,
       withdrawals: transformedTransactionsApproved,
       rewards: rewards_data_result,
+      incoming: treasuries_data,
     };
 
     res.status(200).send(result);
