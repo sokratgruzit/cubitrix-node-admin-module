@@ -499,11 +499,7 @@ async function handle_filter(req, res) {
         if (search_option == "all") {
           if (search_value) {
             if (search_option == "all") {
-              all_value.push(
-                { tx_hash: { $regex: search_value, $options: "i" } },
-                { from: { $regex: search_value, $options: "i" } },
-                { to: { $regex: search_value, $options: "i" } },
-              );
+              all_value.push({ address: { $regex: search_value, $options: "i" } });
             } else {
               all_value = [
                 {
@@ -519,6 +515,7 @@ async function handle_filter(req, res) {
             },
           ];
         }
+
         // if (select_value && select_value != "all") {
         //   if (all_value && all_value.length > 0) {
         //     search_query = {
@@ -557,6 +554,7 @@ async function handle_filter(req, res) {
         } else {
           search_query = {};
         }
+
         result = await account_meta.aggregate([
           { $match: search_query },
           {
