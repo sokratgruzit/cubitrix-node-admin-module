@@ -439,10 +439,10 @@ async function handle_filter(req, res) {
           }
         }
         if (
-          (!isEmpty(select_tx_status_value) && select_tx_status_value != "all") ||
+          (!isEmpty(select_tx_status_value) && select_tx_status_value !== "all") ||
           (select_tx_type_value &&
             !isEmpty(select_tx_type_value) &&
-            select_tx_type_value != "all")
+            select_tx_type_value !== "all")
         ) {
           if (search_value) {
             final_value = [{ $or: all_value }];
@@ -452,12 +452,16 @@ async function handle_filter(req, res) {
           if (
             !isEmpty(select_tx_status_value) &&
             select_tx_status_value &&
-            select_tx_status_value != "all"
+            select_tx_status_value !== "all"
           ) {
             final_value.push({ tx_status: select_tx_status_value });
           }
 
-          if (!isEmpty(select_tx_type_value) && select_tx_type_value) {
+          if (
+            !isEmpty(select_tx_type_value) &&
+            select_tx_type_value &&
+            select_tx_type_value !== "all"
+          ) {
             final_value.push({ tx_type: select_tx_type_value });
           }
 
