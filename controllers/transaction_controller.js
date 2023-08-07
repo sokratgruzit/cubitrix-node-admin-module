@@ -1,4 +1,4 @@
-const { transactions, treasuries } = require("@cubitrix/models");
+const { transactions, treasuries, accounts } = require("@cubitrix/models");
 const main_helper = require("../helpers/index");
 var mongoose = require("mongoose");
 
@@ -61,6 +61,8 @@ const change_transaction_status = async (req, res) => {
 
     let promises = [transactions.findOneAndUpdate({ _id }, { tx_status })];
 
+    console.log(tx.tx_status, tx_status);
+
     if (tx.tx_status == "pending" && tx_status == "approved") {
       const currency = tx?.tx_options?.currency?.toUpperCase();
       const pendingWithdrawalAmount = treasury.pendingWithdrawals[currency] || 0;
@@ -83,6 +85,51 @@ const change_transaction_status = async (req, res) => {
           },
         ),
       );
+    } else if (tx.tx_status == "pending" && tx_status == "canceled") {
+      const currency = tx?.tx_options?.currency?.toUpperCase();
+      promises.push(
+        treasuries.findOneAndUpdate(
+          {},
+          {
+            $inc: {
+              [`pendingWithdrawals.${currency}`]: 0 - tx.amount,
+            },
+          },
+        ),
+      );
+      if (tx.tx_options.currency === "ATR") {
+        promises.push(
+          accounts.findOneAndUpdate(
+            { account_owner: tx.from, account_category: "main" },
+            {
+              $inc: {
+                balance: Number(tx.amount),
+              },
+            },
+          ),
+        );
+      } else {
+        promises.push(
+          accounts.findOneAndUpdate(
+            { account_owner: tx.from, account_category: "main" },
+            {
+              $inc: {
+                [`assets.${currency?.toLowerCase()}`]: Number(tx.amount),
+              },
+            },
+          ),
+        );
+      }
+      // promises.push(
+      //   accounts.findOneAndUpdate(
+      //     { account_owner: tx.from, account_category: "main" },
+      //     {
+      //       $inc: {
+      //         [`balances.${currency}`]: tx.amount,
+      //       },
+      //     },
+      //   ),
+      // );
     }
 
     const [updateTx, updateTreasury] = await Promise.all(promises);
