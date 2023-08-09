@@ -467,8 +467,13 @@ async function handle_filter(req, res) {
 
           search_query = final_value.length > 1 ? { $and: final_value } : final_value[0];
         } else {
-          search_query = { $or: all_value };
+          if (all_value.length > 0) {
+            search_query = { $or: all_value };
+          } else {
+            search_query = {};
+          }
         }
+
         result = await transactions
           .find(search_query)
           .sort({ createdAt: "desc" })
