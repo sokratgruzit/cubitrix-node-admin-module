@@ -465,7 +465,13 @@ async function handle_filter(req, res) {
             final_value.push({ tx_type: select_tx_type_value });
           }
 
-          search_query = final_value.length > 1 ? { $and: final_value } : final_value[0];
+          if (final_value.length > 1) {
+            search_query = { $and: final_value };
+          } else if (final_value.length == 1) {
+            search_query = final_value[0];
+          } else {
+            search_query = {}; // Default to no specific filter
+          }
         } else {
           if (all_value.length > 0) {
             search_query = { $or: all_value };
