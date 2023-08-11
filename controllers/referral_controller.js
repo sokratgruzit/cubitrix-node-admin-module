@@ -89,14 +89,14 @@ async function testbinarycalc(req, res) {
     const currentDayOfWeek = currentDate.getDay();
 
     if (uni_days == "daily") {
-      await referral_controller.uni_comission_count(1);
+      await referral_controller.binary_comission_count(1);
     } else if ((uni_days = "monthly")) {
       if (currentDay === 1) {
-        await referral_controller.uni_comission_count(daysBetween);
+        await referral_controller.binary_comission_count(daysBetween);
       }
     } else if ((uni_days = "weekly")) {
       if (currentDayOfWeek === 1) {
-        await referral_controller.uni_comission_count(7);
+        await referral_controller.binary_comission_count(7);
       }
     }
     return main_helper.success_response(res, "success");
