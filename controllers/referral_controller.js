@@ -56,24 +56,25 @@ const delete_referral_settings = async (req, res) => {
 async function testunicalc(req, res) {
   let { uni_days } = req.body;
   try {
+    if (!uni_days) {
+      uni_days = "daily";
+    }
     let daysBetween = getdaysBetween();
 
     const currentDate = new Date();
     const currentDay = currentDate.getDate();
     const currentDayOfWeek = currentDate.getDay();
+    let result = null;
 
     if (uni_days == "daily") {
-      await referral_controller.uni_comission_count(1);
+      result = await referral_controller.uni_comission_count(1);
     } else if ((uni_days = "monthly")) {
-      if (currentDay === 1) {
-        await referral_controller.uni_comission_count(daysBetween);
-      }
+      result = await referral_controller.uni_comission_count(daysBetween);
     } else if ((uni_days = "weekly")) {
-      if (currentDayOfWeek === 1) {
-        await referral_controller.uni_comission_count(7);
-      }
+      result = await referral_controller.uni_comission_count(7);
     }
-    return main_helper.success_response(res, "success");
+
+    return main_helper.success_response(res, result);
   } catch (e) {
     return main_helper.error_response(res, e?.message || e.toString());
   }
@@ -81,25 +82,26 @@ async function testunicalc(req, res) {
 
 async function testbinarycalc(req, res) {
   let { uni_days } = req.body;
+  if (!uni_days) {
+    uni_days = "daily";
+  }
   try {
     let daysBetween = getdaysBetween();
 
     const currentDate = new Date();
     const currentDay = currentDate.getDate();
     const currentDayOfWeek = currentDate.getDay();
-
+    let result = null;
+    console.log(uni_days, daysBetween);
     if (uni_days == "daily") {
-      await referral_controller.binary_comission_count(1);
+      result = await referral_controller.binary_comission_count(1);
     } else if ((uni_days = "monthly")) {
-      if (currentDay === 1) {
-        await referral_controller.binary_comission_count(daysBetween);
-      }
+      result = await referral_controller.binary_comission_count(daysBetween);
     } else if ((uni_days = "weekly")) {
-      if (currentDayOfWeek === 1) {
-        await referral_controller.binary_comission_count(7);
-      }
+      result = await referral_controller.binary_comission_count(7);
     }
-    return main_helper.success_response(res, "success");
+    console.log(result);
+    return main_helper.success_response(res, result);
   } catch (e) {
     return main_helper.error_response(res, e?.message || e.toString());
   }
