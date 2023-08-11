@@ -1,5 +1,9 @@
 const { options } = require("@cubitrix/models");
 const main_helper = require("../helpers/index");
+const {
+  referral,
+  referral_controller,
+} = require("@cubitrix/cubitrix-refferal-node-module");
 
 const edit_referral_setting = async (req, res) => {
   try {
@@ -113,7 +117,7 @@ async function getdaysBetween() {
   const firstDayOfCurrentMonth = new Date(currentYear, currentMonth - 1, 1);
 
   const daysBetween = Math.round(
-    (firstDayOfCurrentMonth - firstDayOfPreviousMonth) / (1000 * 60 * 60 * 24),
+    (firstDayOfCurrentMonth - firstDayOfPreviousMonth) / (1000 * 60 * 60 * 24)
   );
   return daysBetween;
 }
