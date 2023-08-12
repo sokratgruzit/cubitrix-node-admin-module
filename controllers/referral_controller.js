@@ -59,7 +59,7 @@ async function testunicalc(req, res) {
     if (!uni_days) {
       uni_days = "daily";
     }
-    let daysBetween = getdaysBetween();
+    let daysBetween = await getdaysBetween();
 
     const currentDate = new Date();
     const currentDay = currentDate.getDate();
@@ -68,9 +68,9 @@ async function testunicalc(req, res) {
 
     if (uni_days == "daily") {
       result = await referral_controller.uni_comission_count(1);
-    } else if ((uni_days = "monthly")) {
+    } else if (uni_days === "monthly") {
       result = await referral_controller.uni_comission_count(daysBetween);
-    } else if ((uni_days = "weekly")) {
+    } else if (uni_days === "weekly") {
       result = await referral_controller.uni_comission_count(7);
     }
 
@@ -86,7 +86,7 @@ async function testbinarycalc(req, res) {
     uni_days = "daily";
   }
   try {
-    let daysBetween = getdaysBetween();
+    let daysBetween = await getdaysBetween();
 
     const currentDate = new Date();
     const currentDay = currentDate.getDate();
@@ -95,9 +95,9 @@ async function testbinarycalc(req, res) {
     console.log(uni_days, daysBetween);
     if (uni_days == "daily") {
       result = await referral_controller.binary_comission_count(1);
-    } else if ((uni_days = "monthly")) {
+    } else if (uni_days === "monthly") {
       result = await referral_controller.binary_comission_count(daysBetween);
-    } else if ((uni_days = "weekly")) {
+    } else if (uni_days === "weekly") {
       result = await referral_controller.binary_comission_count(7);
     }
     console.log(result);
@@ -119,7 +119,7 @@ async function getdaysBetween() {
   const firstDayOfCurrentMonth = new Date(currentYear, currentMonth - 1, 1);
 
   const daysBetween = Math.round(
-    (firstDayOfCurrentMonth - firstDayOfPreviousMonth) / (1000 * 60 * 60 * 24)
+    (firstDayOfCurrentMonth - firstDayOfPreviousMonth) / (1000 * 60 * 60 * 24),
   );
   return daysBetween;
 }
