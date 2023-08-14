@@ -309,6 +309,7 @@ async function handle_filter(req, res) {
               $or: [
                 { address: { $regex: search_value, $options: "i" } },
                 { account_owner: { $regex: search_value, $options: "i" } },
+                { email: { $regex: search_value, $options: "i" } },
               ],
             });
             for (let i = 0; i < all_accounts_list.length; i++) {
@@ -509,15 +510,11 @@ async function handle_filter(req, res) {
 
         if (search_option == "all") {
           if (search_value) {
-            if (search_option == "all") {
-              all_value.push({ address: { $regex: search_value, $options: "i" } });
-            } else {
-              all_value = [
-                {
-                  [search_option]: { $regex: search_value, $options: "i" },
-                },
-              ];
-            }
+            all_value.push(
+              { address: { $regex: search_value, $options: "i" } },
+              { email: { $regex: search_value, $options: "i" } },
+              { name: { $regex: search_value, $options: "i" } },
+            );
           }
         } else {
           all_value = [

@@ -1,6 +1,6 @@
 {
   "name": "@cubitrix/cubitrix-node-admin-module",
-  "version": "0.0.44",
+  "version": "0.0.45",
   "description": "module for managing globals data",
   "main": "admin.js",
   "scripts": {
