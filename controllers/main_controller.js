@@ -4,6 +4,7 @@ const {
   account_meta,
   user,
   treasuries,
+  options,
 } = require("@cubitrix/models");
 const main_helper = require("../helpers/index");
 const account_helper = require("../helpers/accounts");
@@ -160,8 +161,15 @@ async function rewards_data() {
               $cond: [
                 {
                   $and: [
-                    { $gte: ["$createdAt", new Date(today.getFullYear(), 0, 1)] },
-                    { $lt: ["$createdAt", new Date(today.getFullYear() + 1, 0, 1)] },
+                    {
+                      $gte: ["$createdAt", new Date(today.getFullYear(), 0, 1)],
+                    },
+                    {
+                      $lt: [
+                        "$createdAt",
+                        new Date(today.getFullYear() + 1, 0, 1),
+                      ],
+                    },
                   ],
                 },
                 "$amount",
@@ -245,9 +253,13 @@ async function edit_user_meta(req, res) {
         address,
       };
 
-      const updated = await account_meta.findOneAndUpdate({ address }, updateData, {
-        new: true,
-      });
+      const updated = await account_meta.findOneAndUpdate(
+        { address },
+        updateData,
+        {
+          new: true,
+        }
+      );
 
       if (updated) {
         return main_helper.success_response(res, updated);
@@ -294,10 +306,16 @@ async function handle_filter(req, res) {
     }
     if (req_type === "account") {
       if (req_filter && !isEmpty(req_filter)) {
-        if (req_filter?.selects && req_filter?.selects?.account_type_id != "all") {
+        if (
+          req_filter?.selects &&
+          req_filter?.selects?.account_type_id != "all"
+        ) {
           select_value = req_filter?.selects?.account_type_id;
         }
-        if (!req_filter?.search?.option || req_filter?.search?.option == "all") {
+        if (
+          !req_filter?.search?.option ||
+          req_filter?.search?.option == "all"
+        ) {
           search_option = "all";
         } else {
           search_option = req_filter?.search?.option;
@@ -417,7 +435,10 @@ async function handle_filter(req, res) {
         select_tx_status_value = req_filter?.selects?.tx_status;
         select_tx_type_value = req_filter?.selects?.tx_type;
 
-        if (!req_filter?.search?.option || req_filter?.search?.option == "all") {
+        if (
+          !req_filter?.search?.option ||
+          req_filter?.search?.option == "all"
+        ) {
           search_option = "all";
         } else {
           search_option = req_filter?.search?.option;
@@ -429,7 +450,7 @@ async function handle_filter(req, res) {
             all_value.push(
               { tx_hash: { $regex: search_value, $options: "i" } },
               { from: { $regex: search_value, $options: "i" } },
-              { to: { $regex: search_value, $options: "i" } },
+              { to: { $regex: search_value, $options: "i" } }
             );
           } else {
             all_value = [
@@ -440,7 +461,8 @@ async function handle_filter(req, res) {
           }
         }
         if (
-          (!isEmpty(select_tx_status_value) && select_tx_status_value !== "all") ||
+          (!isEmpty(select_tx_status_value) &&
+            select_tx_status_value !== "all") ||
           (select_tx_type_value &&
             !isEmpty(select_tx_type_value) &&
             select_tx_type_value !== "all")
@@ -501,7 +523,10 @@ async function handle_filter(req, res) {
         // select_value = req_filter?.selects?.nationality;
         select_value_account_type_id = req_filter?.selects?.account_type_id;
 
-        if (!req_filter?.search?.option || req_filter?.search?.option == "all") {
+        if (
+          !req_filter?.search?.option ||
+          req_filter?.search?.option == "all"
+        ) {
           search_option = "all";
         } else {
           search_option = req_filter?.search?.option;
@@ -513,7 +538,7 @@ async function handle_filter(req, res) {
             all_value.push(
               { address: { $regex: search_value, $options: "i" } },
               { email: { $regex: search_value, $options: "i" } },
-              { name: { $regex: search_value, $options: "i" } },
+              { name: { $regex: search_value, $options: "i" } }
             );
           }
         } else {
@@ -535,7 +560,10 @@ async function handle_filter(req, res) {
         //     };
         //   }
         // }
-        if (select_value_account_type_id && select_value_account_type_id != "all") {
+        if (
+          select_value_account_type_id &&
+          select_value_account_type_id != "all"
+        ) {
           all_select_accounts_list = await accounts.find({
             account_category: select_value_account_type_id,
           });
@@ -644,7 +672,7 @@ async function handle_filter(req, res) {
         status: true,
         data: result,
         pages: Math.ceil(total_pages / limit),
-      }),
+      })
     );
   } catch (e) {
     return main_helper.error_response(res, e.message);
@@ -680,11 +708,14 @@ async function edit_account(req, res) {
       const updatedAccountMeta = await account_meta.findOneAndUpdate(
         { address: accountData.externalAddress },
         { email },
-        { new: true },
+        { new: true }
       );
 
       const updatedAccounts = await accounts.findOneAndUpdate(
-        { account_owner: accountData.externalAddress, account_category: "main" },
+        {
+          account_owner: accountData.externalAddress,
+          account_category: "main",
+        },
         {
           extensions: {
             staking,
@@ -700,11 +731,14 @@ async function edit_account(req, res) {
           },
           active: active,
         },
-        { new: true },
+        { new: true }
       );
 
       if (updatedAccountMeta && updatedAccounts) {
-        return main_helper.success_response(res, { updatedAccountMeta, updatedAccounts });
+        return main_helper.success_response(res, {
+          updatedAccountMeta,
+          updatedAccounts,
+        });
       }
 
       return main_helper.error_response(res, "Could not update");
@@ -840,10 +874,13 @@ async function total_data(req, res) {
     }
     let transformedTransactionsApproved = {};
     if (transactions_data_approved.length > 0) {
-      transformedTransactionsApproved = transactions_data_approved.reduce((acc, curr) => {
-        acc[curr._id] = curr.totalAmount;
-        return acc;
-      }, {});
+      transformedTransactionsApproved = transactions_data_approved.reduce(
+        (acc, curr) => {
+          acc[curr._id] = curr.totalAmount;
+          return acc;
+        },
+        {}
+      );
     } else {
       transformedTransactionsApproved = {
         ATR: 0,
@@ -857,10 +894,13 @@ async function total_data(req, res) {
 
     let transformedTransactionsPending = {};
     if (transactions_data_pending.length > 0) {
-      transformedTransactionsPending = transactions_data_pending.reduce((acc, curr) => {
-        acc[curr._id] = curr.totalAmount;
-        return acc;
-      }, {});
+      transformedTransactionsPending = transactions_data_pending.reduce(
+        (acc, curr) => {
+          acc[curr._id] = curr.totalAmount;
+          return acc;
+        },
+        {}
+      );
     } else {
       transformedTransactionsPending = {
         ATR: 0,
@@ -897,6 +937,43 @@ function isEmpty(obj) {
   return JSON.stringify(obj) === JSON.stringify({});
 }
 
+const edit_options_settings = async (req, res) => {
+  try {
+    let { key } = req.body;
+    let option_data = await options.findOne({ key });
+    if (option_data) {
+      await options.findOneAndUpdate({ key }, { object_value: req.body });
+    } else {
+      await options.create({
+        key,
+        object_value: req.body,
+      });
+    }
+    let return_data = await options.findOne({ key });
+
+    return main_helper.success_response(res, return_data);
+  } catch (e) {
+    console.log(e.message);
+    return main_helper.error_response(res, "error");
+  }
+};
+
+const get_options_setting = async (req, res) => {
+  let { key } = req.body;
+  let return_data = await options.findOne({ key });
+  return main_helper.success_response(res, return_data);
+};
+
+const delete_options_settings = async (req, res) => {
+  try {
+    let return_data = await options.findOneAndDelete({ key });
+    return main_helper.success_response(res, return_data);
+  } catch (e) {
+    console.log(e.message);
+    return main_helper.error_response(res, "error");
+  }
+};
+
 module.exports = {
   handle_filter,
   delete_user,
@@ -905,4 +982,7 @@ module.exports = {
   dashboard_accounts,
   edit_account,
   total_data,
+  edit_options_settings,
+  get_options_setting,
+  delete_options_settings,
 };
