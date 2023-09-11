@@ -268,7 +268,7 @@ async function edit_atar_price(req, res) {
     const updatedRates = await rates.findOneAndUpdate(
       {},
       {
-        "atr.usd": fixed_price,
+        "atr.usd": price,
       },
       { new: true },
     );
