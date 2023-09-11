@@ -265,10 +265,14 @@ async function edit_atar_price(req, res) {
   try {
     let { price } = req.body;
 
+    if (!price) {
+      return main_helper.error_response(res, "Price is required");
+    }
+
     const updatedRates = await rates.findOneAndUpdate(
       {},
       {
-        "atr.usd": price,
+        "atr.usd": Number(price),
       },
       { new: true },
     );
