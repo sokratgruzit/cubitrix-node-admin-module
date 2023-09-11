@@ -3,6 +3,7 @@ const main_helper = require("../helpers/index");
 const {
   referral,
   referral_controller,
+  rates,
 } = require("@cubitrix/cubitrix-refferal-node-module");
 
 const edit_referral_setting = async (req, res) => {
