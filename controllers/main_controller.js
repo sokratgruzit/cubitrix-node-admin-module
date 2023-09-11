@@ -12,11 +12,6 @@ const _ = require("lodash");
 
 async function dashboard_accounts(req, res) {
   try {
-    // let responseData = await axios
-    //   .get("https://api.coinbase.com/v2/accounts", {
-    //       'Authorization': `Bearer ${process.env.COINBASE_API_KEY}`
-    //   });
-    //   console.log(responseData?.data);
     let withdrawals = await transactions.aggregate([
       {
         $match: {
