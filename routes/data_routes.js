@@ -22,6 +22,12 @@ router.post(
   main_controller.edit_atar_price,
 );
 
+router.post(
+  "/edit-currency-stakes-apy",
+  verify_roles(config.roles[0]),
+  main_controller.edit_currency_stakes_apy,
+);
+
 router.post("/filter", main_controller.handle_filter);
 router.post("/edit_referral_setting", referral_settings.edit_referral_setting);
 router.post("/delete_referral_settings", referral_settings.delete_referral_settings);
