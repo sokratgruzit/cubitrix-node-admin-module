@@ -324,7 +324,7 @@ async function edit_onchain_stakes_apy(req, res) {
     const updatedRates = await rates.findOneAndUpdate(
       {},
       {
-        OnChainStakingApy: apy,
+        onChainStakingApy: apy,
       },
       { new: true },
     );
