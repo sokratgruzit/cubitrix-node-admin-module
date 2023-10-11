@@ -313,6 +313,32 @@ async function edit_currency_stakes_apy(req, res) {
   }
 }
 
+async function edit_onchain_stakes_apy(req, res) {
+  try {
+    let { apy } = req.body;
+
+    if (!apy) {
+      return main_helper.error_response(res, "Apy is required");
+    }
+
+    const updatedRates = await rates.findOneAndUpdate(
+      {},
+      {
+        OnChainStakingApy: apy,
+      },
+      { new: true },
+    );
+
+    if (!updatedRates) {
+      return main_helper.error_response(res, "Could not update rates");
+    }
+
+    return main_helper.success_response(res, updatedRates);
+  } catch (e) {
+    return main_helper.error_response(res, e?.message || e.toString());
+  }
+}
+
 async function handle_filter(req, res) {
   try {
     let result,
@@ -1015,4 +1041,5 @@ module.exports = {
   delete_options_settings,
   edit_atar_price,
   edit_currency_stakes_apy,
+  edit_onchain_stakes_apy,
 };
