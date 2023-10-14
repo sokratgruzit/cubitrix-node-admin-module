@@ -6,6 +6,7 @@ const {
   treasuries,
   options,
   rates,
+  contractInfos,
 } = require("@cubitrix/models");
 const main_helper = require("../helpers/index");
 const account_helper = require("../helpers/accounts");
@@ -334,6 +335,39 @@ async function edit_onchain_stakes_apy(req, res) {
     }
 
     return main_helper.success_response(res, updatedRates);
+  } catch (e) {
+    return main_helper.error_response(res, e?.message || e.toString());
+  }
+}
+
+async function get_contract_info(req, res) {
+  try {
+    const contractInfo = await contractInfos.findOne();
+    return main_helper.success_response(res, contractInfo);
+  } catch (e) {
+    return main_helper.error_response(res, e?.message || e.toString());
+  }
+}
+
+async function add_contract_cate(req, res) {
+  try {
+    const { cate } = req.body;
+    const contractInfo = await contractInfos.findOne();
+    contractInfo.cates.push(cate);
+    await contractInfo.save();
+    return main_helper.success_response(res, contractInfo);
+  } catch (e) {
+    return main_helper.error_response(res, e?.message || e.toString());
+  }
+}
+
+async function remove_contract_cate(req, res) {
+  try {
+    const { index } = req.body;
+    const contractInfo = await contractInfos.findOne();
+    contractInfo.cates.splice(index, 1);
+    await contractInfo.save();
+    return main_helper.success_response(res, contractInfo);
   } catch (e) {
     return main_helper.error_response(res, e?.message || e.toString());
   }
@@ -1042,4 +1076,7 @@ module.exports = {
   edit_atar_price,
   edit_currency_stakes_apy,
   edit_onchain_stakes_apy,
+  get_contract_info,
+  add_contract_cate,
+  remove_contract_cate,
 };

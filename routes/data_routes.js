@@ -28,6 +28,13 @@ router.post(
   main_controller.edit_currency_stakes_apy,
 );
 
+router.post("/get_contract_info", main_controller.get_contract_info);
+router.post(
+  "/add_contract_cate",
+  verify_roles(config.roles[0]),
+  main_controller.add_contract_cate,
+);
+
 router.post(
   "/edit-onchain-stakes-apy",
   verify_roles(config.roles[0]),
