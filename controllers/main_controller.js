@@ -351,9 +351,15 @@ async function get_contract_info(req, res) {
 
 async function add_contract_apy(req, res) {
   try {
-    const { apy } = req.body;
+    const { apy, index } = req.body;
     const contractInfo = await contractInfos.findOne();
-    contractInfo.apys.push(apy);
+
+    if (contractInfo.apys.length === Number(index)) {
+      contractInfo.apys.push(apy);
+    } else {
+      contractInfo.apys[Number(index)] = apy;
+    }
+
     await contractInfo.save();
     return main_helper.success_response(res, contractInfo);
   } catch (e) {
