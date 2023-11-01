@@ -34,6 +34,11 @@ router.post(
   verify_roles(config.roles[0]),
   main_controller.add_contract_apy,
 );
+router.post(
+  "/remove_contract_apy",
+  verify_roles(config.roles[0]),
+  main_controller.remove_contract_apy,
+);
 
 router.post(
   "/edit-onchain-stakes-apy",
