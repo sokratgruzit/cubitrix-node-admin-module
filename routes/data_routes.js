@@ -30,9 +30,9 @@ router.post(
 
 router.post("/get_contract_info", main_controller.get_contract_info);
 router.post(
-  "/add_contract_cate",
+  "/add_contract_apy",
   verify_roles(config.roles[0]),
-  main_controller.add_contract_cate,
+  main_controller.add_contract_apy,
 );
 
 router.post(

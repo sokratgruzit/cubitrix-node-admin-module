@@ -349,11 +349,11 @@ async function get_contract_info(req, res) {
   }
 }
 
-async function add_contract_cate(req, res) {
+async function add_contract_apy(req, res) {
   try {
-    const { cate } = req.body;
+    const { apy } = req.body;
     const contractInfo = await contractInfos.findOne();
-    contractInfo.cates.push(cate);
+    contractInfo.apys.push(apy);
     await contractInfo.save();
     return main_helper.success_response(res, contractInfo);
   } catch (e) {
@@ -361,11 +361,11 @@ async function add_contract_cate(req, res) {
   }
 }
 
-async function remove_contract_cate(req, res) {
+async function remove_contract_apy(req, res) {
   try {
     const { index } = req.body;
     const contractInfo = await contractInfos.findOne();
-    contractInfo.cates.splice(index, 1);
+    contractInfo.apys.splice(index, 1);
     await contractInfo.save();
     return main_helper.success_response(res, contractInfo);
   } catch (e) {
@@ -1077,6 +1077,6 @@ module.exports = {
   edit_currency_stakes_apy,
   edit_onchain_stakes_apy,
   get_contract_info,
-  add_contract_cate,
-  remove_contract_cate,
+  add_contract_apy,
+  remove_contract_apy,
 };
