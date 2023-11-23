@@ -354,11 +354,9 @@ async function add_contract_apy(req, res) {
     const { apy, index } = req.body;
     const contractInfo = await contractInfos.findOne();
 
-    console.log(apy, index)
-    if (contractInfo.apys.length === Number(index)) {
+    if (contractInfo && contractInfo.apys.length === Number(index)) {
       contractInfo.apys.push(apy);
     } else {
-      console.log(apy)
       contractInfo.apys[Number(index)] = apy;
     }
 
@@ -372,10 +370,29 @@ async function add_contract_apy(req, res) {
 async function remove_contract_apy(req, res) {
   try {
     const { index } = req.body;
-    const contractInfo = await contractInfos.findOne();
-    contractInfo.apys.splice(index, 1);
-    await contractInfo.save();
-    return main_helper.success_response(res, contractInfo);
+    
+    const contractInfo = await contractInfos.findOneAndUpdate({},
+      {
+        $unset: {
+          [`apys.${index}`]: 1,
+        },
+      },
+      { returnDocument: 'after' } 
+    );
+
+    let compactedApys = contractInfo.apys.filter(Boolean);
+    
+    for (let i = index; i < compactedApys.length; i++) {
+      compactedApys[i].tierId = String(i);
+    }
+
+    const update = {
+      $set: { apys: compactedApys }
+    };
+    
+    const result = await contractInfos.updateOne({}, update);
+
+    return main_helper.success_response(res, result);
   } catch (e) {
     return main_helper.error_response(res, e?.message || e.toString());
   }
