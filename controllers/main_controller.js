@@ -354,9 +354,11 @@ async function add_contract_apy(req, res) {
     const { apy, index } = req.body;
     const contractInfo = await contractInfos.findOne();
 
+    console.log(apy, index)
     if (contractInfo.apys.length === Number(index)) {
       contractInfo.apys.push(apy);
     } else {
+      console.log(apy)
       contractInfo.apys[Number(index)] = apy;
     }
 

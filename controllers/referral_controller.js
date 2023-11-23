@@ -74,7 +74,7 @@ async function testunicalc(req, res) {
     } else if (uni_days === "weekly") {
       result = await referral_controller.uni_comission_count(7);
     }
-
+    console.log('uni-1', result)
     return main_helper.success_response(res, result);
   } catch (e) {
     return main_helper.error_response(res, e?.message || e.toString());
@@ -100,7 +100,7 @@ async function testbinarycalc(req, res) {
     } else if (uni_days === "weekly") {
       result = await referral_controller.binary_comission_count(7);
     }
-    console.log(result);
+    console.log('binary-1', result);
     return main_helper.success_response(res, result);
   } catch (e) {
     return main_helper.error_response(res, e?.message || e.toString());
