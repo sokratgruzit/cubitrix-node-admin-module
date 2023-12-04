@@ -41,7 +41,7 @@ async function dashboard_accounts(req, res) {
           atrSum: { $sum: "$balance" },
           btcSum: { $sum: "$assets.btc" },
           ethSum: { $sum: "$assets.eth" },
-          usdcSum: { $sum: "$assets.usdc" },
+          usdtSum: { $sum: "$assets.usdt" },
           goldSum: { $sum: "$assets.gold" },
           platinumSum: { $sum: "$assets.platinum" },
         },
@@ -75,14 +75,14 @@ async function dashboard_accounts(req, res) {
           : 0,
         pendings: pendings[0]?.ethSum,
       },
-      usdc: {
+      usdt: {
         incoming: _.find(incomings, { asset: "USDT" })
           ? _.find(incomings, { asset: "USDT" })?.balance
           : 0,
         withdrawals: _.find(withdrawals, { _id: "USDT" })
           ? _.find(withdrawals, { _id: "USDT" })?.totalAmount
           : 0,
-        pendings: pendings[0]?.usdcSum,
+        pendings: pendings[0]?.usdtSum,
       },
       gold: {
         incoming: _.find(incomings, { asset: "GOLD" })
@@ -885,7 +885,7 @@ async function total_data(req, res) {
                 totalStaked: { $sum: "$stakedTotal" },
                 totalBtc: { $sum: "$assets.btc" },
                 totalEth: { $sum: "$assets.eth" },
-                totalUsdc: { $sum: "$assets.usdc" },
+                totalUsdt: { $sum: "$assets.usdt" },
                 totalGold: { $sum: "$assets.gold" },
                 totalPlatinum: { $sum: "$assets.platinum" },
               },
@@ -925,7 +925,7 @@ async function total_data(req, res) {
           tx_status: "pending",
           tx_type: "withdraw",
           "tx_options.currency": {
-            $in: ["ATR", "btc", "eth", "usdc", "gold", "platinum"],
+            $in: ["ATR", "btc", "eth", "usdt", "gold", "platinum"],
           },
         },
       },
@@ -943,7 +943,7 @@ async function total_data(req, res) {
           tx_status: "approved",
           tx_type: "withdraw",
           "tx_options.currency": {
-            $in: ["ATR", "btc", "eth", "usdc", "gold", "platinum"],
+            $in: ["ATR", "btc", "eth", "usdt", "gold", "platinum"],
           },
         },
       },
@@ -983,7 +983,7 @@ async function total_data(req, res) {
           totalStaked: 0,
           totalBtc: 0,
           totalEth: 0,
-          totalUsdc: 0,
+          totalUsdt: 0,
           totalGold: 0,
           totalPlatinum: 0,
         },
@@ -1002,7 +1002,7 @@ async function total_data(req, res) {
         ATR: 0,
         btc: 0,
         eth: 0,
-        usdc: 0,
+        usdt: 0,
         gold: 0,
         platinum: 0,
       };
@@ -1019,7 +1019,7 @@ async function total_data(req, res) {
         ATR: 0,
         btc: 0,
         eth: 0,
-        usdc: 0,
+        usdt: 0,
         gold: 0,
         platinum: 0,
       };
