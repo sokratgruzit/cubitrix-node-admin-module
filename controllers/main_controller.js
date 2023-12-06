@@ -287,26 +287,54 @@ async function edit_atar_price(req, res) {
     return main_helper.error_response(res, e?.message || e.toString());
   }
 }
+// old
+// async function edit_currency_stakes_apy(req, res) {
+//   try {
+//     let { apy, currency } = req.body;
 
+//     if (!apy) {
+//       return main_helper.error_response(res, "Apy is required");
+//     }
+
+//     const updatedRates = await rates.findOneAndUpdate(
+//       {},
+//       {
+//         stakingAPY: apy,
+//       },
+//       { new: true },
+//     );
+
+//     if (!updatedRates) {
+//       return main_helper.error_response(res, "Could not update rates");
+//     }
+
+//     return main_helper.success_response(res, updatedRates);
+//   } catch (e) {
+//     return main_helper.error_response(res, e?.message || e.toString());
+//   }
+// }
+
+// new
 async function edit_currency_stakes_apy(req, res) {
   try {
-    let { apy } = req.body;
+    let { apy, currency } = req.body;
 
-    if (!apy) {
-      return main_helper.error_response(res, "Apy is required");
+    if (!apy || currency) {
+      return main_helper.error_response(res, "Apy and Currency is required");
     }
 
-    const updatedRates = await rates.findOneAndUpdate(
-      {},
-      {
-        stakingAPY: apy,
-      },
-      { new: true },
-    );
+    // Retrieve the existing rates document
+    const existingRates = await rates.findOne();
 
-    if (!updatedRates) {
-      return main_helper.error_response(res, "Could not update rates");
+    if (!existingRates) {
+      return main_helper.error_response(res, "Rates document not found");
     }
+
+    // Update only the 'bnb' property in the stakingAPY object
+    existingRates.stakingAPY.currency = apy;
+
+    // Save the updated rates document
+    const updatedRates = await existingRates.save();
 
     return main_helper.success_response(res, updatedRates);
   } catch (e) {
