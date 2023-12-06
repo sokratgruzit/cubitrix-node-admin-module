@@ -318,9 +318,10 @@ async function edit_atar_price(req, res) {
 async function edit_currency_stakes_apy(req, res) {
   try {
     let { apy, currency } = req.body;
+    console.log(req.body)
 
-    if (!apy || currency) {
-      return main_helper.error_response(res, "Apy and Currency is required");
+    if (!apy || !currency) {
+      return main_helper.error_response(res, "Apy and Currency are required");
     }
 
     // Retrieve the existing rates document
@@ -330,11 +331,11 @@ async function edit_currency_stakes_apy(req, res) {
       return main_helper.error_response(res, "Rates document not found");
     }
 
-    // Update only the 'bnb' property in the stakingAPY object
-    existingRates.stakingAPY.currency = apy;
+    // Update property in the stakingAPY object
+    existingRates.stakingAPY[currency] = apy;
 
     // Save the updated rates document
-    const updatedRates = await existingRates.save();
+    const updatedRates = await rates.save();
 
     return main_helper.success_response(res, updatedRates);
   } catch (e) {
