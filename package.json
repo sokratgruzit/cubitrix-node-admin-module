@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@cubitrix/models": ">=0.1.40",
-    "@cubitrix/cubitrix-refferal-node-module": ">=0.0.139",
+    "@cubitrix/cubitrix-refferal-node-module": ">=0.0.140",
     "axios": "^1.4.0",
     "bcryptjs": "^2.4.3",
     "config": "^3.3.9",
