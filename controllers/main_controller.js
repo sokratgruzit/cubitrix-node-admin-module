@@ -5,8 +5,7 @@ const {
   user,
   treasuries,
   options,
-  rates,
-  contractInfos,
+  rates
 } = require("@cubitrix/models");
 const main_helper = require("../helpers/index");
 const account_helper = require("../helpers/accounts");
@@ -308,90 +307,6 @@ async function edit_currency_stakes_apy(req, res) {
     }
 
     return main_helper.success_response(res, updatedRates);
-  } catch (e) {
-    return main_helper.error_response(res, e?.message || e.toString());
-  }
-}
-
-async function edit_onchain_stakes_apy(req, res) {
-  try {
-    let { apy } = req.body;
-
-    if (!apy) {
-      return main_helper.error_response(res, "Apy is required");
-    }
-
-    const updatedRates = await rates.findOneAndUpdate(
-      {},
-      {
-        onChainStakingApy: apy,
-      },
-      { new: true },
-    );
-
-    if (!updatedRates) {
-      return main_helper.error_response(res, "Could not update rates");
-    }
-
-    return main_helper.success_response(res, updatedRates);
-  } catch (e) {
-    return main_helper.error_response(res, e?.message || e.toString());
-  }
-}
-
-async function get_contract_info(req, res) {
-  try {
-    const contractInfo = await contractInfos.findOne();
-    return main_helper.success_response(res, contractInfo);
-  } catch (e) {
-    return main_helper.error_response(res, e?.message || e.toString());
-  }
-}
-
-async function add_contract_apy(req, res) {
-  try {
-    const { apy, index } = req.body;
-    const contractInfo = await contractInfos.findOne();
-
-    if (contractInfo && contractInfo.apys.length === Number(index)) {
-      contractInfo.apys.push(apy);
-    } else {
-      contractInfo.apys[Number(index)] = apy;
-    }
-
-    await contractInfo.save();
-    return main_helper.success_response(res, contractInfo);
-  } catch (e) {
-    return main_helper.error_response(res, e?.message || e.toString());
-  }
-}
-
-async function remove_contract_apy(req, res) {
-  try {
-    const { index } = req.body;
-    
-    const contractInfo = await contractInfos.findOneAndUpdate({},
-      {
-        $unset: {
-          [`apys.${index}`]: 1,
-        },
-      },
-      { returnDocument: 'after' } 
-    );
-
-    let compactedApys = contractInfo.apys.filter(Boolean);
-    
-    for (let i = index; i < compactedApys.length; i++) {
-      compactedApys[i].tierId = String(i);
-    }
-
-    const update = {
-      $set: { apys: compactedApys }
-    };
-    
-    const result = await contractInfos.updateOne({}, update);
-
-    return main_helper.success_response(res, result);
   } catch (e) {
     return main_helper.error_response(res, e?.message || e.toString());
   }
@@ -1098,9 +1013,5 @@ module.exports = {
   get_options_setting,
   delete_options_settings,
   edit_atar_price,
-  edit_currency_stakes_apy,
-  edit_onchain_stakes_apy,
-  get_contract_info,
-  add_contract_apy,
-  remove_contract_apy,
+  edit_currency_stakes_apy
 };
