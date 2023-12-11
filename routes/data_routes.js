@@ -28,24 +28,6 @@ router.post(
   main_controller.edit_currency_stakes_apy,
 );
 
-router.post("/get_contract_info", main_controller.get_contract_info);
-router.post(
-  "/add_contract_apy",
-  verify_roles(config.roles[0]),
-  main_controller.add_contract_apy,
-);
-router.post(
-  "/remove_contract_apy",
-  verify_roles(config.roles[0]),
-  main_controller.remove_contract_apy,
-);
-
-router.post(
-  "/edit-onchain-stakes-apy",
-  verify_roles(config.roles[0]),
-  main_controller.edit_onchain_stakes_apy,
-);
-
 router.post("/filter", main_controller.handle_filter);
 router.post("/edit_referral_setting", referral_settings.edit_referral_setting);
 router.post("/delete_referral_settings", referral_settings.delete_referral_settings);

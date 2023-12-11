@@ -93,6 +93,7 @@ async function testbinarycalc(req, res) {
     const currentDay = currentDate.getDate();
     const currentDayOfWeek = currentDate.getDay();
     let result = null;
+    
     if (uni_days == "daily") {
       result = await referral_controller.binary_comission_count(1);
     } else if (uni_days === "monthly") {
@@ -100,7 +101,7 @@ async function testbinarycalc(req, res) {
     } else if (uni_days === "weekly") {
       result = await referral_controller.binary_comission_count(7);
     }
-    console.log('binary-1', result);
+    
     return main_helper.success_response(res, result);
   } catch (e) {
     return main_helper.error_response(res, e?.message || e.toString());
