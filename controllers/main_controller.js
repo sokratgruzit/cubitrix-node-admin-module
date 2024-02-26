@@ -464,6 +464,7 @@ async function handle_filter(req, res) {
         total_pages = await accounts.count({ account_owner: "" });
       }
     }
+
     if (req_type === "transactions") {
       if (req_filter && !isEmpty(req_filter)) {
         select_tx_status_value = req_filter?.selects?.tx_status;
@@ -557,6 +558,7 @@ async function handle_filter(req, res) {
         total_pages = await transactions.count();
       }
     }
+
     if (req_type === "users") {
       if (req_filter && !isEmpty(req_filter)) {
         // select_value = req_filter?.selects?.nationality;
@@ -567,6 +569,7 @@ async function handle_filter(req, res) {
         } else {
           search_option = req_filter?.search?.option;
         }
+
         search_value = req_filter?.search?.value;
 
         if (search_option == "all") {
@@ -596,6 +599,7 @@ async function handle_filter(req, res) {
         //     };
         //   }
         // }
+
         if (select_value_account_type_id && select_value_account_type_id != "all") {
           all_select_accounts_list = await accounts.find({
             account_category: select_value_account_type_id,
@@ -615,6 +619,7 @@ async function handle_filter(req, res) {
             select_all_value = { address: { $in: parent_select_account } };
           }
         }
+
         if (all_value.length > 0) {
           search_query = { $or: all_value };
           if (select_all_value && !isEmpty(select_all_value)) {
@@ -644,14 +649,17 @@ async function handle_filter(req, res) {
           },
           { $unwind: "$main_account" },
           {
+            $sort: { "main_account.createdAt": -1 } // Sort by createdAt field in main_account
+          },
+          {
             $limit: limit + limit * (req_page - 1),
           },
           {
             $skip: limit * (req_page - 1),
           },
-          {
-            $sort: { createdAt: -1 },
-          },
+          // {
+          //   $sort: { createdAt: -1 },
+          // },
         ]);
         // result = await account_meta
         //   .find(search_query)
@@ -679,18 +687,23 @@ async function handle_filter(req, res) {
           },
           { $unwind: "$main_account" },
           {
+            $sort: { "main_account.createdAt": -1 } // Sort by createdAt field in main_account
+          },
+          {
             $limit: limit + limit * (req_page - 1),
           },
           {
             $skip: limit * (req_page - 1),
           },
-          {
-            $sort: { createdAt: -1 },
-          },
+          // {
+          //   $sort: { createdAt: -1 },
+          // },
         ]);
+
         total_pages = await account_meta.count(data);
       }
     }
+    
     if (req_type === "admins") {
       result = await user
         .find()
