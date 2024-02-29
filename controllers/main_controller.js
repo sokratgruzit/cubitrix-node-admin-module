@@ -344,6 +344,7 @@ async function handle_filter(req, res) {
       data = without_search;
       data.address = data.address.toLowerCase();
     }
+
     if (req_type === "account") {
       if (req_filter && !isEmpty(req_filter)) {
         if (req_filter?.selects && req_filter?.selects?.account_type_id != "all") {
@@ -379,6 +380,7 @@ async function handle_filter(req, res) {
             });
           }
         }
+
         if (select_value && select_value != "all" && !search_value) {
           all_select_accounts_list = await accounts.find({
             account_category: select_value,
@@ -401,11 +403,13 @@ async function handle_filter(req, res) {
             all_value.push({ address: { $in: parent_select_account } });
           }
         }
+
         if (all_value && all_value.length < 1) {
           search_query = { account_owner: "" };
         } else {
           search_query = { $or: all_value };
         }
+
         result = await accounts.aggregate([
           { $match: search_query },
           {
@@ -426,6 +430,7 @@ async function handle_filter(req, res) {
             $sort: { createdAt: -1 },
           },
         ]);
+        
         total_pages = await accounts.count(search_query);
       } else {
         result = await accounts.aggregate([
