@@ -32,7 +32,7 @@ router.post("/filter", main_controller.handle_filter);
 router.post("/edit_referral_setting", referral_settings.edit_referral_setting);
 router.post("/delete_referral_settings", referral_settings.delete_referral_settings);
 router.post("/get_referral_setting", referral_settings.get_referral_setting);
-
+router.post("/get_global_data", referral_settings.get_referral_global_data);
 router.post("/testunicalc", verify_roles(config.roles[0]), referral_settings.testunicalc);
 router.post(
   "/testbinarycalc",
