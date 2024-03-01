@@ -2,43 +2,6 @@ const { transactions, treasuries, accounts } = require("@cubitrix/models");
 const main_helper = require("../helpers/index");
 var mongoose = require("mongoose");
 
-// const change_transaction_status = async (req, res) => {
-//   try {
-//     let { _id, tx_status } = req.body;
-//     _id = mongoose.Types.ObjectId(_id);
-
-//     let tx = await transactions.findOne({ _id });
-//     if (!tx) {
-//       return main_helper.error_response(res, "transaction not found");
-//     }
-//     if (tx.tx_type == "payment") {
-//       return main_helper.error_response(
-//         res,
-//         "cannot change status to payment transaction",
-//       );
-//     }
-//     const [updateTx, updateTreasury] = await Promise.all([
-//       transactions.findOneAndUpdate({ _id }, { tx_status }),
-//       treasuries.findOneAndUpdate(
-//         {},
-//         {
-//           $inc: {
-//             [`withdrawals.${tx?.tx_options?.currency?.toUpperCase()}`]: tx.amount,
-//           },
-//         },
-//       ),
-//     ]);
-//     if (updateTx) {
-//       return main_helper.success_response(res, updateTx);
-//     } else {
-//       return main_helper.error_response(res, "error");
-//     }
-//   } catch (e) {
-//     console.log(e.message);
-//     return main_helper.error_response(res, "error");
-//   }
-// };
-
 const change_transaction_status = async (req, res) => {
   try {
     let { _id, tx_status } = req.body;
@@ -50,29 +13,30 @@ const change_transaction_status = async (req, res) => {
     ]);
 
     if (!tx) {
-      return main_helper.error_response(res, "transaction not found");
+      return main_helper.error_response(res, "Transaction not found");
     }
+
     if (tx.tx_type == "payment") {
       return main_helper.error_response(
         res,
-        "cannot change status to payment transaction",
+        "Cannot change status to payment transaction",
       );
     }
 
     let promises = [transactions.findOneAndUpdate({ _id }, { tx_status })];
 
-    console.log(tx.tx_status, tx_status);
-
     if (tx.tx_status == "pending" && tx_status == "approved") {
       const currency = tx?.tx_options?.currency?.toUpperCase();
       const pendingWithdrawalAmount = treasury.pendingWithdrawals[currency] || 0;
       const currentIncomingAmount = treasury.incoming[currency] || 0;
+
       if (pendingWithdrawalAmount + tx.amount > currentIncomingAmount) {
         return main_helper.error_response(
           res,
           "Insufficient funds for withdrawal in treasury",
         );
       }
+      
       promises.push(
         treasuries.findOneAndUpdate(
           {},
