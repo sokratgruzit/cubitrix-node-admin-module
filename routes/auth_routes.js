@@ -9,7 +9,6 @@ const {
   login_validator,
 } = require("../middlewares/validators/auth_validator");
 
-// /api/auth
 router.post("/register", register_validator, verify_roles(config.roles[0]), auth_controller.register);
 
 router.post("/login", login_validator, auth_controller.login);
