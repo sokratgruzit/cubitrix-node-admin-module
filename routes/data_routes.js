@@ -8,16 +8,16 @@ const transaction_controller = require("../controllers/transaction_controller");
 const verify_roles = require("../middlewares/verify_roles");
 
 router.post(
-  "/delete-user", 
+  "/delete-user",
   auth_middleware,
-  verify_roles(config.roles[0]), 
+  verify_roles(config.roles[0]),
   main_controller.delete_user
 );
 
 router.post(
-  "/edit-account", 
+  "/edit-account",
   auth_middleware,
-  verify_roles(config.roles[0]), 
+  verify_roles(config.roles[0]),
   main_controller.edit_account
 );
 
@@ -25,57 +25,53 @@ router.post(
   "/edit-user-meta",
   auth_middleware,
   verify_roles(config.roles[0]),
-  main_controller.edit_user_meta,
+  main_controller.edit_user_meta
 );
 
 router.post(
   "/edit-atar-price",
   auth_middleware,
   verify_roles(config.roles[0]),
-  main_controller.edit_atar_price,
+  main_controller.edit_atar_price
 );
 
 router.post(
   "/edit-currency-stakes-apy",
   auth_middleware,
   verify_roles(config.roles[0]),
-  main_controller.edit_currency_stakes_apy,
+  main_controller.edit_currency_stakes_apy
 );
 
-router.post(
-  "/filter", 
-  auth_middleware,
-  main_controller.handle_filter
-);
+router.post("/filter", auth_middleware, main_controller.handle_filter);
 
 router.post(
-  "/edit_referral_setting", 
+  "/edit_referral_setting",
   auth_middleware,
   referral_settings.edit_referral_setting
 );
 
 router.post(
-  "/delete_referral_settings", 
+  "/delete_referral_settings",
   auth_middleware,
   referral_settings.delete_referral_settings
 );
 
 router.post(
-  "/get_referral_setting", 
+  "/get_referral_setting",
   auth_middleware,
   referral_settings.get_referral_setting
 );
 
 router.post(
-  "/get_global_data", 
+  "/get_global_data",
   auth_middleware,
   referral_settings.get_referral_global_data
 );
 
 router.post(
-  "/testunicalc", 
+  "/testunicalc",
   auth_middleware,
-  verify_roles(config.roles[0]), 
+  verify_roles(config.roles[0]),
   referral_settings.testunicalc
 );
 
@@ -83,7 +79,7 @@ router.post(
   "/testbinarycalc",
   auth_middleware,
   verify_roles(config.roles[0]),
-  referral_settings.testbinarycalc,
+  referral_settings.testbinarycalc
 );
 
 router.post(
@@ -93,16 +89,12 @@ router.post(
 );
 
 router.post(
-  "/edit_transaction", 
+  "/edit_transaction",
   auth_middleware,
   transaction_controller.edit_transaction
 );
 
-router.post(
-  "/total_data", 
-  auth_middleware,
-  main_controller.total_data
-);
+router.post("/total_data", auth_middleware, main_controller.total_data);
 
 router.post(
   "/dashboard_accounts",
@@ -111,21 +103,26 @@ router.post(
 );
 
 router.post(
-  "/edit_options_setting", 
+  "/edit_options_setting",
   auth_middleware,
   main_controller.edit_options_settings
 );
 
 router.post(
-  "/delete_main_controller", 
+  "/delete_main_controller",
   auth_middleware,
   main_controller.delete_options_settings
 );
 
 router.post(
-  "/get_options_setting", 
+  "/get_options_setting",
   auth_middleware,
   main_controller.get_options_setting
+);
+router.post(
+  "/add_transaction_fee",
+  auth_middleware,
+  transaction_controller.edit_transaction
 );
 
 module.exports = router;
