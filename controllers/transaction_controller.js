@@ -136,6 +136,9 @@ const edit_transaction = async (req, res) => {
 async function add_transaction_fee(req, res) {
   const {
     transaction_type,
+    effective_from_date,
+    effective_to_date,
+    user_tier,
     description,
     fee_type,
     base_fee,
@@ -157,6 +160,9 @@ async function add_transaction_fee(req, res) {
   try {
     const newTransactionFee = await transaction_fee.create({
       transaction_type,
+      effective_from_date,
+      effective_to_date,
+      user_tier,
       description,
       fee_type,
       base_fee,
@@ -183,6 +189,9 @@ async function edit_transaction_fee(req, res) {
   const {
     _id,
     transaction_type,
+    effective_from_date,
+    effective_to_date,
+    user_tier,
     description,
     fee_type,
     base_fee,
@@ -204,6 +213,9 @@ async function edit_transaction_fee(req, res) {
       { _id },
       {
         transaction_type,
+        effective_from_date,
+        effective_to_date,
+        user_tier,
         description,
         fee_type,
         base_fee,
