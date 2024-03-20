@@ -152,6 +152,8 @@ async function add_transaction_fee(req, res) {
     last_updated,
   } = req.body.popUpData;
 
+  console.log(req.body);
+
   try {
     const newTransactionFee = await transaction_fee.create({
       transaction_type,
@@ -171,9 +173,9 @@ async function add_transaction_fee(req, res) {
       last_updated,
     });
     console.log("Transaction Fee added successfully.");
-    return main_helper.success_response(newTransactionFee);
+    return main_helper.success_response(res, newTransactionFee);
   } catch (e) {
-    return main_helper.error_response(res, "error staking currency");
+    return main_helper.error_response(res, "error Transaction Fee added");
   }
 }
 
@@ -221,7 +223,7 @@ async function edit_transaction_fee(req, res) {
     );
 
     console.log("Transaction Fee updated successfully.");
-    return main_helper.success_response(updatedTransactionFee);
+    return main_helper.success_response(res, updatedTransactionFee);
   } catch (e) {
     return main_helper.error_response(res, "Error updating Transaction Fee");
   }
@@ -234,9 +236,7 @@ async function delete_transaction_fee(req, res) {
     const result = await transaction_fee.findByIdAndDelete(_id);
 
     console.log("Transaction Fee deleted successfully.");
-    return main_helper.success_response(
-      "Transaction Fee deleted successfully."
-    );
+    return main_helper.success_response(res, result);
   } catch (e) {
     console.error("Error deleting transaction fee:", res);
     return main_helper.error_response(res, "Error deleting transaction fee");
@@ -248,7 +248,7 @@ async function get_all_transaction_fees(req, res) {
     const allTransactionFees = await transaction_fee.find({});
 
     console.log("All Transaction Fees retrieved successfully.");
-    return main_helper.success_response(allTransactionFees);
+    return main_helper.success_response(res, allTransactionFees);
   } catch (e) {
     console.error("Error retrieving transaction fees:", res);
     return main_helper.error_response(res, "Error retrieving transaction fees");
