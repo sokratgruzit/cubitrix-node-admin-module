@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const config = require("../config/default.json");
 
 async function register(email, roles, password, id) {
-  console.log(roles,'hiii')
   const candidate = await user.findOne({ email });
   let user_role = null;
 

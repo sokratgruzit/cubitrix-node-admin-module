@@ -1,4 +1,11 @@
-const { options } = require("@cubitrix/models");
+const { 
+  options,
+  accounts,
+  transactions,
+  referral_uni_users,
+  referral_binary_users,
+  account_meta,
+} = require("@cubitrix/models");
 const main_helper = require("../helpers/index");
 const {
   referral,
@@ -125,10 +132,152 @@ async function getdaysBetween() {
   return daysBetween;
 }
 
+const get_referral_global_data = async (req, res) => {
+  try {
+    let { limit, page } = req.body;
+
+    const skip = (page - 1) * limit;
+    let days_between = await getdaysBetween();
+    let global_data = [];
+
+    let main_accounts = await accounts
+    .find({ account_category: "main" })
+    .skip(skip)
+    .limit(limit);
+
+    let total_pages = await accounts
+    .find({ account_category: "main" })
+    .count();
+
+    for (let i = 0; i < main_accounts.length; i++) {
+      let main_address = main_accounts[i].address;
+      let owner = main_accounts[i].account_owner;
+      let balance = main_accounts[i].balance;
+      let total_staked = main_accounts[i].stakedTotal;
+      let flush_out = main_accounts[i].flush_out;
+      let binary_calc = await referral_controller.binary_comission_count_user(days_between, main_address);
+      
+      let meta = await account_meta.find({
+        address: owner
+      });
+      
+      let email = meta[0]?.email;
+      
+      let uni_users = await referral_uni_users.count({
+        referral_address: main_address,
+      });
+
+      let binary_users = await referral_binary_users.count({
+        referral_address: main_address,
+      });
+
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      let uni_comission_this_month = await transactions.aggregate([
+        {
+          $match: {
+            to: main_address,
+            tx_type: "bonus",
+            "tx_options.type": "uni",
+            createdAt: { $gte: startOfMonth },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: "$amount" },
+          },
+        },
+      ]);
+
+      let uni_comission_total = await transactions.aggregate([
+        {
+          $match: {
+            to: main_address,
+            tx_type: "bonus",
+            "tx_options.type": "uni",
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: "$amount" },
+          },
+        },
+      ]);
+      
+      let binary_comission_this_month = await transactions.aggregate([
+        {
+          $match: {
+            to: main_address,
+            tx_type: "bonus",
+            "tx_options.type": "binary bv",
+            createdAt: { $gte: startOfMonth },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: "$amount" },
+          },
+        },
+      ]);
+
+      let binary_comission_total = await transactions.aggregate([
+        {
+          $match: {
+            to: main_address,
+            tx_type: "bonus",
+            "tx_options.type": "binary bv",
+            createdAt: { $gte: startOfMonth },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: "$amount" },
+          },
+        },
+      ]);
+
+      global_data.push({
+        email: email ? email : "No email",
+        parent_email: "Parent email not found",
+        address: owner,
+        uni_users,
+        binary_users,
+        uni_comission_this_month,
+        uni_comission_total,
+        binary_comission_this_month,
+        binary_comission_total,
+        balance,
+        total_staked,
+        flush_out: flush_out,
+        binary_calc
+      });
+    }
+
+    return main_helper.success_response(res, {
+      referrals: global_data,
+      pagination: {
+        page,
+        pages: Math.ceil(total_pages / limit),
+        limit
+      }
+    });
+  } catch (e) {
+    console.log(e.message);
+    return main_helper.error_response(res, "error");
+  }
+};
+
 module.exports = {
   delete_referral_settings,
   edit_referral_setting,
   get_referral_setting,
   testunicalc,
   testbinarycalc,
+  get_referral_global_data
 };
