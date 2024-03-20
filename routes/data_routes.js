@@ -122,7 +122,22 @@ router.post(
 router.post(
   "/add_transaction_fee",
   auth_middleware,
-  transaction_controller.edit_transaction
+  transaction_controller.add_transaction_fee
+);
+router.post(
+  "/edit_transaction_fee",
+  auth_middleware,
+  transaction_controller.edit_transaction_fee
+);
+router.post(
+  "/delete_transaction_fee",
+  auth_middleware,
+  transaction_controller.delete_transaction_fee
+);
+router.post(
+  "/get_all_transaction_fees",
+  auth_middleware,
+  transaction_controller.get_all_transaction_fees
 );
 
 module.exports = router;

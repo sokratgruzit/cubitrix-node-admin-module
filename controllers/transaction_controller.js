@@ -243,7 +243,23 @@ async function delete_transaction_fee(req, res) {
   }
 }
 
+async function get_all_transaction_fees(req, res) {
+  try {
+    const allTransactionFees = await transaction_fee.find({});
+
+    console.log("All Transaction Fees retrieved successfully.");
+    return main_helper.success_response(allTransactionFees);
+  } catch (error) {
+    console.error("Error retrieving transaction fees:", error);
+    return main_helper.error_response(
+      error,
+      "Error retrieving transaction fees"
+    );
+  }
+}
+
 module.exports = {
+  get_all_transaction_fees,
   delete_transaction_fee,
   edit_transaction_fee,
   add_transaction_fee,
