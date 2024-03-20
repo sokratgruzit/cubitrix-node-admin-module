@@ -172,8 +172,8 @@ async function add_transaction_fee(req, res) {
     });
     console.log("Transaction Fee added successfully.");
     return main_helper.success_response(newTransactionFee);
-  } catch (error) {
-    return main_helper.error_response(error, "error staking currency");
+  } catch (e) {
+    return main_helper.error_response(res, "error staking currency");
   }
 }
 
@@ -222,8 +222,8 @@ async function edit_transaction_fee(req, res) {
 
     console.log("Transaction Fee updated successfully.");
     return main_helper.success_response(updatedTransactionFee);
-  } catch (error) {
-    return main_helper.error_response(error, "Error updating Transaction Fee");
+  } catch (e) {
+    return main_helper.error_response(res, "Error updating Transaction Fee");
   }
 }
 
@@ -237,9 +237,9 @@ async function delete_transaction_fee(req, res) {
     return main_helper.success_response(
       "Transaction Fee deleted successfully."
     );
-  } catch (error) {
-    console.error("Error deleting transaction fee:", error);
-    return main_helper.error_response(error, "Error deleting transaction fee");
+  } catch (e) {
+    console.error("Error deleting transaction fee:", res);
+    return main_helper.error_response(res, "Error deleting transaction fee");
   }
 }
 
@@ -249,12 +249,9 @@ async function get_all_transaction_fees(req, res) {
 
     console.log("All Transaction Fees retrieved successfully.");
     return main_helper.success_response(allTransactionFees);
-  } catch (error) {
-    console.error("Error retrieving transaction fees:", error);
-    return main_helper.error_response(
-      error,
-      "Error retrieving transaction fees"
-    );
+  } catch (e) {
+    console.error("Error retrieving transaction fees:", res);
+    return main_helper.error_response(res, "Error retrieving transaction fees");
   }
 }
 
