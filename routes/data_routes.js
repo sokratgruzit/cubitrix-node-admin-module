@@ -140,4 +140,28 @@ router.post(
   transaction_controller.get_all_transaction_fees
 );
 
+router.post(
+  "/add_transaction_amount",
+  auth_middleware,
+  transaction_controller.add_transaction_amount
+);
+
+router.post(
+  "/edit_transaction_amount",
+  auth_middleware,
+  transaction_controller.edit_transaction_amount
+);
+
+router.post(
+  "/delete_transaction_amount",
+  auth_middleware,
+  transaction_controller.delete_transaction_amount
+);
+
+router.post(
+  "/get_all_transaction_amounts",
+  auth_middleware,
+  transaction_controller.get_all_transaction_amounts
+);
+
 module.exports = router;
