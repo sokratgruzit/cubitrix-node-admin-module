@@ -269,22 +269,22 @@ async function get_all_transaction_fees(req, res) {
 }
 
 const add_transaction_amount = async (req, res) => {
-  try {
-    let {
-      parameter_id,
-      transaction_type,
-      user_tier,
-      minimum_transaction_limit,
-      maximum_transaction_limit,
-      currency,
-      base_currency,
-      currency_conversion_rate,
-      effective_from_date,
-      effective_to_date,
-      last_updated,
-    } = req.body;
+  const {
+    parameter_id,
+    transaction_type,
+    user_tier,
+    minimum_transaction_limit,
+    maximum_transaction_limit,
+    currency,
+    base_currency,
+    currency_conversion_rate,
+    effective_from_date,
+    effective_to_date,
+    last_updated,
+  } = req.body.popUpData;
 
-    let newTransactionAmount = await transaction_amounts.create({
+  try {
+    const newTransactionAmount = await transaction_amounts.create({
       parameter_id,
       transaction_type,
       user_tier,
