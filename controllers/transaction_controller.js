@@ -3,6 +3,7 @@ const {
   treasuries,
   accounts,
   transaction_fee,
+  transaction_amounts,
 } = require("@cubitrix/models");
 const main_helper = require("../helpers/index");
 var mongoose = require("mongoose");
@@ -267,6 +268,108 @@ async function get_all_transaction_fees(req, res) {
   }
 }
 
+const add_transaction_amount = async (req, res) => {
+  const {
+    parameter_id,
+    transaction_type,
+    user_tier,
+    minimum_transaction_limit,
+    maximum_transaction_limit,
+    currency,
+    base_currency,
+    currency_conversion_rate,
+    effective_from_date,
+    effective_to_date,
+    last_updated,
+  } = req.body.popUpData;
+
+  try {
+    const newTransactionAmount = await transaction_amounts.create({
+      parameter_id,
+      transaction_type,
+      user_tier,
+      minimum_transaction_limit,
+      maximum_transaction_limit,
+      currency,
+      base_currency,
+      currency_conversion_rate,
+      effective_from_date,
+      effective_to_date,
+      last_updated,
+    });
+    console.log("Transaction Amount added successfully.");
+    return main_helper.success_response(res, newTransactionAmount);
+  } catch (e) {
+    return main_helper.error_response(res, "error Transaction Amount added");
+  }
+};
+
+const edit_transaction_amount = async (req, res) => {
+  try {
+    let {
+      _id,
+      parameter_id,
+      transaction_type,
+      user_tier,
+      minimum_transaction_limit,
+      maximum_transaction_limit,
+      currency,
+      base_currency,
+      currency_conversion_rate,
+      effective_from_date,
+      effective_to_date,
+      last_updated,
+    } = req.body;
+
+    let updateTransactionAmount = await transaction_amounts.findOneAndUpdate(
+      { _id },
+      {
+        parameter_id,
+        transaction_type,
+        user_tier,
+        minimum_transaction_limit,
+        maximum_transaction_limit,
+        currency,
+        base_currency,
+        currency_conversion_rate,
+        effective_from_date,
+        effective_to_date,
+        last_updated,
+      }
+    );
+    console.log("Transaction Amount updated successfully.");
+    return main_helper.success_response(res, updateTransactionAmount);
+  } catch (e) {
+    return main_helper.error_response(res, "error Transaction Amount updated");
+  }
+};
+
+const delete_transaction_amount = async (req, res) => {
+  try {
+    let { _id } = req.body;
+    let deleteTransactionAmount = await transaction_amounts.findByIdAndDelete(
+      _id
+    );
+    console.log("Transaction Amount deleted successfully.");
+    return main_helper.success_response(res, deleteTransactionAmount);
+  } catch (e) {
+    return main_helper.error_response(res, "error Transaction Amount deleted");
+  }
+};
+
+const get_all_transaction_amounts = async (req, res) => {
+  try {
+    let allTransactionAmounts = await transaction_amounts.find({});
+    console.log("All Transaction Amounts retrieved successfully.");
+    return main_helper.success_response(res, allTransactionAmounts);
+  } catch (e) {
+    return main_helper.error_response(
+      res,
+      "error retrieving Transaction Amounts"
+    );
+  }
+};
+
 module.exports = {
   get_all_transaction_fees,
   delete_transaction_fee,
@@ -274,4 +377,8 @@ module.exports = {
   add_transaction_fee,
   change_transaction_status,
   edit_transaction,
+  add_transaction_amount,
+  edit_transaction_amount,
+  delete_transaction_amount,
+  get_all_transaction_amounts,
 };
