@@ -1,6 +1,6 @@
 {
   "name": "@cubitrix/cubitrix-node-admin-module",
-  "version": "0.0.132",
+  "version": "0.0.133",
   "description": "module for managing globals data",
   "main": "admin.js",
   "scripts": {
@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@cubitrix/models": ">=0.1.82",
-    "@cubitrix/cubitrix-refferal-node-module": ">=0.0.201",
+    "@cubitrix/cubitrix-refferal-node-module": ">=0.0.202",
     "axios": "^1.4.0",
     "bcryptjs": "^2.4.3",
     "config": "^3.3.9",
